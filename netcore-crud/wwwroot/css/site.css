@@ -1,0 +1,97 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+/* Login Page Only */
+body.login-page {
+    background: linear-gradient(135deg, #0d6efd 0%, #4f46e5 100%);
+}
+
+/* Login Container */
+.login-wrapper {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Login Card */
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    border: none;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,.25);
+}
+
+/* Header */
+.login-header {
+    background: linear-gradient(135deg, #2563eb, #4f46e5);
+    color: white;
+    text-align: center;
+    padding: 25px;
+}
+
+    .login-header h2 {
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .login-header p {
+        margin-top: 5px;
+        opacity: .8;
+    }
+
+/* Body */
+.login-body {
+    background: white;
+    padding: 35px;
+}
+
+/* Textbox */
+.form-control {
+    border-radius: 10px;
+    height: 48px;
+}
+
+    .form-control:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 .2rem rgba(37,99,235,.2);
+    }
+
+/* Button */
+.btn-login {
+    height: 48px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+/* Footer */
+.login-footer {
+    text-align: center;
+    margin-top: 20px;
+    color: #888;
+    font-size: 14px;
+}
+
+.nav-item.dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0;
+}
