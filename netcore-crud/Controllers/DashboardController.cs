@@ -9,7 +9,7 @@ namespace netcore_crud.Controllers
             return View();
         }
 
-        public IActionResult Dashboard()
+        public IActionResult Index()
         {
             return View();
         }

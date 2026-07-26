@@ -1,0 +1,30 @@
+﻿@model List<netcore_crud.Models.ModuleModel>
+
+@foreach (var group in Model.GroupBy(x => x.Category))
+{
+    <li class="nav-item dropdown">
+
+        <a class="nav-link dropdown-toggle"
+           href="#"
+           data-bs-toggle="dropdown">
+
+            @group.Key
+
+        </a>
+
+        <ul class="dropdown-menu">
+
+            @foreach (var item in group)
+            {
+                <li>
+                    <a class="dropdown-item" href="@item.Url">
+                        <i class="@item.CssClass"></i>
+                      @item.Module
+                    </a>
+                </li>
+            }
+
+        </ul>
+
+    </li>
+}

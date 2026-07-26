@@ -1,0 +1,61 @@
+﻿@{
+    ViewData["Title"] = "Security";
+}
+@model netcore_crud.Models.CommonViewModel
+
+<div class="module-header">
+    @* HIDDEN FIELD *@
+    <input asp-for="Mode" type="hidden" />
+    <div class="module-title">
+        <i class="bi bi-shield-lock-fill"></i>
+        SECURITY
+        <span class="module-status">
+            >>@Model.Status
+        </span>
+    </div>
+
+    <div class="module-toolbar">
+        <form asp-action="New" method="post" class="d-inline">
+            <button class="btn btn-sm btn-toolbar"><i class="bi bi-plus-lg"></i> New</button>
+        </form>
+        <button class="btn btn-sm btn-toolbar"><i class="bi bi-floppy"></i> Save</button>
+        <button class="btn btn-sm btn-toolbar"><i class="bi bi-trash"></i> Delete</button>
+        <button class="btn btn-sm btn-toolbar"><i class="bi bi-file-earmark"></i> Clear</button>
+        <button class="btn btn-sm btn-toolbar"><i class="bi bi-search"></i> Search</button>
+        <button class="btn btn-sm btn-toolbar"><i class="bi bi-list-ul"></i> List</button>
+    </div>
+
+</div>
+
+<div class="container-fluid mt-3">
+
+    <div class="card mb-3">
+        <div class="card-body">
+            Security Module
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row g-2 align-items-center">
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold mb-1">Created By</label>
+                    <input asp-for="CreatedBy" class="form-control form-control-sm" readonly />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold mb-1">Created Date</label>
+                    <input asp-for="CreatedDate" class="form-control form-control-sm" readonly />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold mb-1">Modified By</label>
+                    <input asp-for="ModifiedBy" class="form-control form-control-sm" readonly />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold mb-1">Modified Date</label>
+                    <input asp-for="ModifiedDate" class="form-control form-control-sm" readonly />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
