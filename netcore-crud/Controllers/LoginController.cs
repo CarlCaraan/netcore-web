@@ -28,7 +28,6 @@ namespace netcore_crud.Controllers
         }
 
 
-
         [HttpPost]
         public IActionResult Index(string Username, string Password)
         {

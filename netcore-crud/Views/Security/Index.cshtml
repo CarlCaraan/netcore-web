@@ -1,16 +1,17 @@
 ﻿@{
     ViewData["Title"] = "Security";
 }
-@model netcore_crud.Models.CommonViewModel
+@model (CommonViewModel Common, SecurityModel Security)
 
 <div class="module-header">
     @* HIDDEN FIELD *@
-    <input asp-for="Mode" type="hidden" />
+    <input asp-for="Common.Mode" type="hidden" />
+
     <div class="module-title">
         <i class="bi bi-shield-lock-fill"></i>
         SECURITY
         <span class="module-status">
-            >>@Model.Status
+            >>@Model.Common.Status
         </span>
     </div>
 
@@ -20,42 +21,187 @@
         </form>
         <button class="btn btn-sm btn-toolbar"><i class="bi bi-floppy"></i> Save</button>
         <button class="btn btn-sm btn-toolbar"><i class="bi bi-trash"></i> Delete</button>
-        <button class="btn btn-sm btn-toolbar"><i class="bi bi-file-earmark"></i> Clear</button>
+        <a asp-action="Index" class="btn btn-sm btn-toolbar"> <i class="bi bi-file-earmark"></i>Clear</a>
         <button class="btn btn-sm btn-toolbar"><i class="bi bi-search"></i> Search</button>
-        <button class="btn btn-sm btn-toolbar"><i class="bi bi-list-ul"></i> List</button>
+        <button class="btn btn-sm btn-toolbar" data-bs-toggle="modal" data-bs-target="#ViewListModal"><i class="bi bi-list-ul"></i> List</button>
     </div>
 
 </div>
 
 <div class="container-fluid mt-3">
 
-    <div class="card mb-3">
-        <div class="card-body">
-            Security Module
-        </div>
-    </div>
-
     <div class="card">
         <div class="card-body">
 
-            <div class="row g-2 align-items-center">
+            <div class="row">
+                <label class="col-md-1 form-label small fw-semibold mb-1">Group Name</label>
+                <div class="col-md-6">
+                    <input asp-for="Security.GroupName" placeholder="Group Name" class="form-control form-control-sm" readonly="@Model.Common.IsReadOnly" />
+                </div>
+                <div class="col-md-5">
+                    <input class="form-check-input" asp-for="Security.CanChangePW" type="checkbox" id="CanChangePassword" />
+                    <label class="form-check-label small fw-semibold" for="CanChangePassword">
+                        Can Change Password
+                    </label>
+                </div>
+
+            </div>
+            <div class="row mt-2">
+                <label class="col-md-1 form-label small fw-semibold mb-1">Description</label>
+                <div class="col-md-6">
+                    <input asp-for="Security.Description" placeholder="Group Description" class="form-control form-control-sm" readonly="@Model.Common.IsReadOnly" />
+                </div>
+
+                <div class="col-md-5">
+                    <button class="btn btn-sm btn-primary"> Manage Users</button>
+                    <button class="btn btn-sm btn-primary"> Export Users</button>
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+            @* AUDIT TRAIL *@
+            <div class="row g-2 align-items-center mt-5 border-top">
                 <div class="col-md-3">
                     <label class="form-label small fw-semibold mb-1">Created By</label>
-                    <input asp-for="CreatedBy" class="form-control form-control-sm" readonly />
+                    <input asp-for="Security.CreatedBy" class="form-control form-control-sm" readonly />
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small fw-semibold mb-1">Created Date</label>
-                    <input asp-for="CreatedDate" class="form-control form-control-sm" readonly />
+                    <input asp-for="Security.CreatedDate" class="form-control form-control-sm" readonly />
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small fw-semibold mb-1">Modified By</label>
-                    <input asp-for="ModifiedBy" class="form-control form-control-sm" readonly />
+                    <input asp-for="Security.ModifiedBy" class="form-control form-control-sm" readonly />
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small fw-semibold mb-1">Modified Date</label>
-                    <input asp-for="ModifiedDate" class="form-control form-control-sm" readonly />
+                    <input asp-for="Security.ModifiedDate" class="form-control form-control-sm" readonly />
                 </div>
+            </div>
+
+
+
+        </div>
+    </div>
+
+
+
+
+
+
+    @* VIEW LIST MODAL *@
+    <div class="modal fade" id="ViewListModal" tabindex="-1" aria-labelledby="ViewListModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content shadow">
+
+                <!-- Header -->
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title fw-bold text-primary" id="ViewListModalLabel">
+                        <i class="bi bi-search"></i> Search
+                        <small class="text-secondary fw-normal">» Results</small>
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body">
+
+                    <!-- Search -->
+                    <div class="row mb-3">
+
+                        <div class="col-md-5">
+                            <input type="text"
+                                   class="form-control"
+                                   placeholder="Search Here..." />
+                        </div>
+
+                        <div class="col-md-2">
+                            <button class="btn btn-primary w-100">
+                                <i class="bi bi-search"></i> Search
+                            </button>
+                        </div>
+
+                        <div class="col-md-3">
+                            <button class="btn btn-primary w-100">
+                                <i class="bi bi-list"></i> Display All Records
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <!-- Grid -->
+                    <div class="table-responsive border rounded" style="height:400px; overflow-y:auto;">
+                        <table class="table table-hover table-bordered table-sm mb-0 align-middle">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th class="text-center" style="width:90px;">Action</th>
+                                    <th>Group Name</th>
+                                    <th>Description</th>
+                                    <th class="text-center" style="width:140px;">Can Change PW</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @if (Model.Common.ViewList != null && Model.Common.ViewList.Rows.Count > 0)
+                                {
+                                    @foreach (System.Data.DataRow row in Model.Common.ViewList.Rows)
+                                    {
+                                        <tr>
+                                            <td class="text-center">
+                                                <form asp-action="Select" method="post" class="d-inline">
+                                                    <input type="hidden" name="rowStamp" value="@row["RowStamp"]" />
+
+                                                    <button type="submit" class="btn btn-link p-0 text-primary fw-semibold">
+                                                        <i class="bi bi-check2-circle"></i> Select
+                                                    </button>
+                                                </form>
+                                            </td>
+                                            <td>@row["GroupName"]</td>
+                                            <td>@row["Description"]</td>
+                                            <td class="text-center">
+                                                <input class="form-check-input"
+                                                       type="checkbox"
+                                                       disabled
+                                                @(Convert.ToBoolean(row["CanChangePW"]) ? "checked" : null) />
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-4">
+                                            No records found.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer">
+                </div>
+
             </div>
         </div>
     </div>
+
 </div>

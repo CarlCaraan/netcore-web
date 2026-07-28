@@ -1,4 +1,8 @@
 ﻿using Microsoft.AspNetCore.Html;
+using Microsoft.Data.SqlClient;
+using netcore_crud.Models;
+using System.Data;
+using System.Reflection;
 
 namespace netcore_crud.App_Code
 {
@@ -28,5 +32,83 @@ namespace netcore_crud.App_Code
 
             return new HtmlString(html);
         }
+
+
+
+
+
+        public static (CommonViewModel Common, T Model) LoadModule<T>(
+              IConfiguration configuration,
+              string tableName,
+              long? rowStamp = null)
+              where T : new()
+        {
+            var common = new CommonViewModel();
+            var model = new T();
+
+            using SqlConnection myconn = new SqlConnection(configuration.GetConnectionString("NetCoreConnection"));
+
+            // Load View List
+            string sql = $"SELECT TOP 30 * FROM {tableName} ORDER BY RowStamp DESC";
+
+            DataTable dt = new();
+
+            using (SqlDataAdapter da = new SqlDataAdapter(sql, myconn))
+            {
+                da.Fill(dt);
+            }
+
+            common.ViewList = dt;
+
+            // Load Selected Record
+            if (rowStamp.HasValue)
+            {
+                string sqlRecord = $"SELECT * FROM {tableName} WHERE RowStamp = @RowStamp";
+
+                using SqlCommand cmd = new SqlCommand(sqlRecord, myconn);
+                cmd.Parameters.AddWithValue("@RowStamp", rowStamp.Value);
+
+                myconn.Open();
+
+                using SqlDataReader dr = cmd.ExecuteReader();
+
+                if (dr.Read())
+                {
+                    foreach (PropertyInfo prop in typeof(T).GetProperties())
+                    {
+                        if (!HasColumn(dr, prop.Name) || dr[prop.Name] == DBNull.Value)
+                            continue;
+
+                        var value = Convert.ChangeType(
+                            dr[prop.Name],
+                            Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType);
+
+                        prop.SetValue(model, value);
+                    }
+
+                    common.Mode = "EDIT";
+                }
+            }
+
+            return (common, model);
+        }
+
+        private static bool HasColumn(SqlDataReader reader, string columnName)
+        {
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                if (reader.GetName(i).Equals(columnName, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+
+            return false;
+        }
+
+
+
+
+
+
+
     }
 }

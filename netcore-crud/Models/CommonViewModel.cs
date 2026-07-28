@@ -1,4 +1,6 @@
-﻿namespace netcore_crud.Models
+﻿using System.Data;
+
+namespace netcore_crud.Models
 {
     public class CommonViewModel
     {
@@ -17,13 +19,6 @@
             }
         }
 
-        // Audit Information
-        public string CreatedBy { get; set; } = string.Empty;
-        public DateTime? CreatedDate { get; set; }
-
-        public string ModifiedBy { get; set; } = string.Empty;
-        public DateTime? ModifiedDate { get; set; }
-
         // Common Flags
         public bool IsNew => Mode == "NEW";
         public bool IsEdit => Mode == "EDIT";
@@ -37,5 +32,12 @@
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 20;
         public int TotalRecords { get; set; }
+
+        //Data Table
+        public int Rowstamp { get; set; } = 0;
+        public DataTable ViewList { get; set; } = new DataTable();
+
+        public bool IsReadOnly { get; set; } = true;
+
     }
 }
