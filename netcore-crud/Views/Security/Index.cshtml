@@ -123,29 +123,30 @@
                 <div class="modal-body">
 
                     <!-- Search -->
-                    <div class="row mb-3">
+                    <form asp-action="SearchViewList" method="post">
+                        <div class="row mb-3">
 
-                        <div class="col-md-5">
-                            <input type="text"
-                                   class="form-control"
-                                   placeholder="Search Here..." />
+                            <div class="col-md-5">
+                                <input asp-for="Common.txtSearch" type="text" class="form-control" placeholder="Search Here..." />
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-search"></i> Search
+                                </button>
+                            </div>
+
+         
+
+                            <div class="col-md-3">
+                                <button class="btn btn-primary w-100">
+                                    <i class="bi bi-list"></i> Display All Records
+                                </button>
+                            </div>
+
                         </div>
+                    </form>
 
-                        <div class="col-md-2">
-                            <button class="btn btn-primary w-100">
-                                <i class="bi bi-search"></i> Search
-                            </button>
-                        </div>
-
-                        <div class="col-md-3">
-                            <button class="btn btn-primary w-100">
-                                <i class="bi bi-list"></i> Display All Records
-                            </button>
-                        </div>
-
-                    </div>
-
-                    <!-- Grid -->
+                    <!-- START VIEW LIST GRID -->
                     <div class="table-responsive border rounded" style="height:400px; overflow-y:auto;">
                         <table class="table table-hover table-bordered table-sm mb-0 align-middle">
                             <thead class="table-light sticky-top">
@@ -194,6 +195,10 @@
                             </tbody>
                         </table>
                     </div>
+                    <!-- END VIEW LIST GRID -->
+
+
+
                 </div>
 
                 <!-- Footer -->
@@ -205,3 +210,15 @@
     </div>
 
 </div>
+
+
+@* SHOW MODAL *@
+@if (ViewBag.ShowModal == true)
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var modal = new bootstrap.Modal(document.getElementById("ViewListModal"));
+            modal.show();
+        });
+    </script>
+}

@@ -58,7 +58,8 @@ namespace netcore_crud.Controllers
         {
             return Commons.LoadModule<SecurityModel>(
                 _configuration,
-                "GroupName",
+                PubTableName,
+                PubPrimary,
                 rowStamp);
         }
 
@@ -102,6 +103,24 @@ namespace netcore_crud.Controllers
 
             return RedirectToAction(nameof(Index), new { rowStamp });
         }
+
+
+        [HttpPost("searchviewlist")]
+        public IActionResult SearchViewList([FromForm(Name = "Item1.txtSearch")] string txtSearch)
+        {
+            var model = Commons.LoadModule<SecurityModel>(
+                _configuration,
+                PubTableName,
+                PubPrimary,
+                null,
+                txtSearch);
+
+            model.Common.txtSearch = txtSearch;
+            ViewBag.ShowModal = true;
+            return View("Index", model);
+        }
+
+
 
 
 

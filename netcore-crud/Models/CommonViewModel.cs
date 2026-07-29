@@ -28,7 +28,7 @@ namespace netcore_crud.Models
         public bool HasError { get; set; }
 
         // Search / Paging (para sa List/Search modules)
-        public string SearchText { get; set; } = string.Empty;
+        public string txtSearch { get; set; } = string.Empty;
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 20;
         public int TotalRecords { get; set; }
@@ -38,6 +38,7 @@ namespace netcore_crud.Models
         public DataTable ViewList { get; set; } = new DataTable();
 
         public bool IsReadOnly { get; set; } = true;
+
 
     }
 }

@@ -38,10 +38,12 @@ namespace netcore_crud.App_Code
 
 
         public static (CommonViewModel Common, T Model) LoadModule<T>(
-              IConfiguration configuration,
-              string tableName,
-              long? rowStamp = null)
-              where T : new()
+            IConfiguration configuration,
+            string TableName,
+            string PubPrimary,
+            long? rowStamp = null,
+            string search = "")
+            where T : new()
         {
             var common = new CommonViewModel();
             var model = new T();
@@ -49,21 +51,35 @@ namespace netcore_crud.App_Code
             using SqlConnection myconn = new SqlConnection(configuration.GetConnectionString("NetCoreConnection"));
 
             // Load View List
-            string sql = $"SELECT TOP 30 * FROM {tableName} ORDER BY RowStamp DESC";
+            string sql;
+
+            if (string.IsNullOrWhiteSpace(search))
+            {
+                sql = $"SELECT TOP 30 * FROM {TableName} ORDER BY RowStamp DESC";
+            }
+            else
+            {
+                sql = $@"  SELECT TOP 30 * FROM {TableName} WHERE {PubPrimary} LIKE @Search OR Description LIKE @Search ORDER BY RowStamp DESC";
+            }
 
             DataTable dt = new();
 
-            using (SqlDataAdapter da = new SqlDataAdapter(sql, myconn))
+            using SqlDataAdapter da = new SqlDataAdapter();
+            da.SelectCommand = new SqlCommand(sql, myconn);
+
+            if (!string.IsNullOrWhiteSpace(search))
             {
-                da.Fill(dt);
+                da.SelectCommand.Parameters.AddWithValue("@Search", $"%{search}%");
             }
+
+            da.Fill(dt);
 
             common.ViewList = dt;
 
             // Load Selected Record
             if (rowStamp.HasValue)
             {
-                string sqlRecord = $"SELECT * FROM {tableName} WHERE RowStamp = @RowStamp";
+                string sqlRecord = $"SELECT * FROM {TableName} WHERE RowStamp = @RowStamp";
 
                 using SqlCommand cmd = new SqlCommand(sqlRecord, myconn);
                 cmd.Parameters.AddWithValue("@RowStamp", rowStamp.Value);
