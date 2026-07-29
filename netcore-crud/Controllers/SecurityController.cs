@@ -54,15 +54,18 @@ namespace netcore_crud.Controllers
         //    return View((common, security));
         //}
 
-        [HttpGet("{rowStamp?}")]
-        public IActionResult Index(long? rowStamp)
+        private (CommonViewModel Common, SecurityModel Security) BuildModel(long? rowStamp)
         {
-            var model = Commons.LoadModule<SecurityModel>(
+            return Commons.LoadModule<SecurityModel>(
                 _configuration,
                 "GroupName",
                 rowStamp);
+        }
 
-            return View(model);
+        [HttpGet("{rowStamp?}")]
+        public IActionResult Index(long? rowStamp)
+        {
+            return View(BuildModel(rowStamp));
         }
 
 
@@ -70,27 +73,21 @@ namespace netcore_crud.Controllers
         [HttpPost("new")]
         public IActionResult New()
         {
-            var common = new CommonViewModel
-            {
-                Mode = "NEW",
-                //ViewList = LoadViewList(),
-                IsReadOnly = false
-            };
+            var model = BuildModel(null);
 
-            var security = new SecurityModel
-            {
-                CreatedBy = HttpContext.Session.GetString("UserName"),
-                CreatedDate = DateTime.Now,
-                ModifiedBy = HttpContext.Session.GetString("UserName"),
-                ModifiedDate = DateTime.Now,
+            model.Common.Mode = "NEW";
+            model.Common.IsReadOnly = false;
 
-                GroupName = "",
-                Description = "",
-                CanChangePW = false
-            };
+            model.Security.CreatedBy = HttpContext.Session.GetString("UserName");
+            model.Security.CreatedDate = DateTime.Now;
+            model.Security.ModifiedBy = HttpContext.Session.GetString("UserName");
+            model.Security.ModifiedDate = DateTime.Now;
 
+            model.Security.GroupName = "";
+            model.Security.Description = "";
+            model.Security.CanChangePW = false;
 
-            return View("Index", (common, security));
+            return View("Index", model);
         }
 
 
