@@ -54,13 +54,43 @@ namespace netcore_crud.Controllers
         //    return View((common, security));
         //}
 
+        //private (CommonViewModel Common, SecurityModel Security) BuildModel(long? rowStamp)
+        //{
+        //    return Commons.LoadModule<SecurityModel>(
+        //        _configuration,
+        //        PubTableName,
+        //        PubPrimary,
+        //        rowStamp);
+        //}
+
+
+
         private (CommonViewModel Common, SecurityModel Security) BuildModel(long? rowStamp)
         {
-            return Commons.LoadModule<SecurityModel>(
+            var model = Commons.LoadModule<SecurityModel>(
                 _configuration,
                 PubTableName,
                 PubPrimary,
                 rowStamp);
+
+            //Load Detail Table
+            if (rowStamp != null)
+            {
+                model.Common.UserAuthority = Commons.LoadModuleDetail<UserAuthorityModel>(
+                    _configuration,
+                    "UserAuthority",
+                    "GroupName",
+                    model.Model.GroupName);
+
+                model.Common.MenuChoice = Commons.LoadModuleDetail<MenuChoiceModel>(
+                    _configuration,
+                    "MenuChoice",
+                    "GroupName",
+                    model.Model.GroupName);
+
+            }
+
+            return model;
         }
 
         [HttpGet("{rowStamp?}")]

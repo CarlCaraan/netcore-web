@@ -118,8 +118,9 @@ body.login-page {
     color: #212529 !important;
 }
 
-
-/* ========= Secondary Navbar ========= */
+/* ===========================
+/* ========= Secondary Navbar =========
+=========================== */
 
 .module-header {
     background: linear-gradient(90deg,#0d47a1,#0288d1);
@@ -169,3 +170,41 @@ body.login-page {
     justify-content: center;
     gap: 4px; /* spacing ng icon at text */
 }
+
+/* ===========================
+   Detail Table
+=========================== */
+
+.detail-table-container {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.detail-table {
+    margin-bottom: 0;
+}
+
+    .detail-table th,
+    .detail-table td {
+        padding: .25rem .5rem;
+        font-size: 12px;
+        vertical-align: middle;
+    }
+
+    .detail-table thead th {
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+
+    .detail-table .form-check-input {
+        margin: 0;
+    }
+
+    .detail-table td.text-center,
+    .detail-table th.text-center {
+        vertical-align: middle;
+    }

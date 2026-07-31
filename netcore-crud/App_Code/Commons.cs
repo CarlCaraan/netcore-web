@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Html;
+﻿using Dapper;
+using Microsoft.AspNetCore.Html;
 using Microsoft.Data.SqlClient;
 using netcore_crud.Models;
 using System.Data;
@@ -36,7 +37,7 @@ namespace netcore_crud.App_Code
 
 
 
-
+        // ========= LOAD MODULE MAIN TABLE =========
         public static (CommonViewModel Common, T Model) LoadModule<T>(
             IConfiguration configuration,
             string TableName,
@@ -121,6 +122,24 @@ namespace netcore_crud.App_Code
         }
 
 
+
+
+
+        public static List<T> LoadModuleDetail<T>(
+        IConfiguration configuration,
+        string tableName,
+        string foreignKey,
+        object foreignKeyValue)
+        {
+            using SqlConnection myconn = new SqlConnection(configuration.GetConnectionString("NetCoreConnection"));
+
+            string sql = $"SELECT * FROM {tableName} WHERE {foreignKey} = @{foreignKey} ORDER BY RowStamp";
+
+            return myconn.Query<T>(sql, new DynamicParameters(new Dictionary<string, object>
+        {
+        { foreignKey, foreignKeyValue }
+        })).ToList();
+        }
 
 
 

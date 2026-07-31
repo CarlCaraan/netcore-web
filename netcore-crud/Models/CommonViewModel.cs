@@ -40,5 +40,8 @@ namespace netcore_crud.Models
         public bool IsReadOnly { get; set; } = true;
 
 
+        // Detail Tables
+        public List<UserAuthorityModel> UserAuthority { get; set; } = new();
+        public List<MenuChoiceModel> MenuChoice { get; set; } = new();
     }
 }

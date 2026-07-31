@@ -1,0 +1,9 @@
+﻿namespace netcore_crud.Models
+{
+    public class MenuChoiceModel
+    {
+        public string? Application { get; set; }
+        public string? Menu { get; set; }
+        public bool Access { get; set; }
+    }
+}

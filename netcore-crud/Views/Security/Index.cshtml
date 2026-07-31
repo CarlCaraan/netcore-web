@@ -61,9 +61,89 @@
             </div>
 
 
+            @* DETAIL TABLE *@
+            <div class="row mt-2">
+                <div class="col-md-4">
+                    <h6 class="text-primary">User Authority</h6>
+                    <div class="table-responsive border rounded detail-table-container">
+                        <table class="table table-bordered table-hover table-sm align-middle detail-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Application</th>
+                                    <th class="text-center">Read</th>
+                                    <th class="text-center">Insert</th>
+                                    <th class="text-center">Edit</th>
+                                    <th class="text-center">Delete</th>
+                                    <th class="text-center">Active</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Common.UserAuthority != null && Model.Common.UserAuthority.Any())
+                                {
+                                    foreach (var item in Model.Common.UserAuthority)
+                                    {
+                                        <tr>
+                                            <td>@item.Application</td>
+                                            <td class="text-center"><input class="form-check-input" type="checkbox" checked="@item.Reads" /></td>
+                                            <td class="text-center"><input class="form-check-input" type="checkbox" checked="@item.Inserts" /></td>
+                                            <td class="text-center"><input class="form-check-input" type="checkbox" checked="@item.Edits" /></td>
+                                            <td class="text-center"><input class="form-check-input" type="checkbox" checked="@item.Deletes" /></td>
+                                            <td class="text-center"><input class="form-check-input" type="checkbox" checked="@(item.Active ?? false)" /></td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">No records found.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="text-primary">Menu Choice</h6>
+                    <div class="table-responsive border rounded detail-table-container">
+                        <table class="table table-bordered table-hover table-sm align-middle detail-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width:35%;">Module</th>
+                                    <th>Menu</th>
+                                    <th class="text-center" style="width:70px;">Access</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Common.MenuChoice != null && Model.Common.MenuChoice.Any())
+                                {
+                                    foreach (var item in Model.Common.MenuChoice)
+                                    {
+                                        <tr>
+                                            <td>@item.Application</td>
+                                            <td>@item.Menu</td>
+                                            <td class="text-center">
+                                                <input class="form-check-input" type="checkbox" checked="@item.Access" />
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted">
+                                            No records found.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-4"></div>
 
+            </div>
 
-
+        
 
 
 
