@@ -138,6 +138,9 @@ namespace netcore_crud.App_Code
             return false;
         }
 
+
+
+
         // Kinukuha ang detail rows na naka-link sa parent record gamit ang foreign key.
         public static List<T> LoadModuleDetail<T>(
         IConfiguration configuration,
@@ -155,6 +158,8 @@ namespace netcore_crud.App_Code
         { foreignKey, foreignKeyValue }
         })).ToList();
         }
+
+
 
 
         /// <summary>
@@ -291,6 +296,8 @@ namespace netcore_crud.App_Code
                 throw;
             }
         }
+
+
 
 
 
