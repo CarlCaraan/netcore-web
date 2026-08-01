@@ -123,20 +123,39 @@ namespace netcore_crud.Controllers
 
 
         [HttpPost("save")]
-        public IActionResult Save(CommonViewModel common, SecurityModel security)
+        public IActionResult Save(
+        [Bind(Prefix = "Item1")] CommonViewModel common,
+        [Bind(Prefix = "Item2")] SecurityModel security)
         {
-            if (common.Mode == "NEW")
+            try
             {
-                // INSERT
-            }
-            else if (common.Mode == "EDIT")
-            {
-                // UPDATE
-            }
+                Commons.SaveModule(_configuration, PubTableName, PubPrimary, security, common.Mode);
 
-            var model = BuildModel(security.GroupName);
+                //Commons.InsertModuleDetail<UserAuthorityModel>(
+                //    _configuration,
+                //    "UserAuthority",
+                //    "GroupName",
+                //    security.GroupName,
+                //    common.UserAuthority);
 
-            return View("Index", model);
+                //Commons.InsertModuleDetail<MenuChoiceModel>(
+                //    _configuration,
+                //    "MenuChoice",
+                //    "GroupName",
+                //    security.GroupName,
+                //    common.MenuChoice);
+
+                var model = BuildModel(security.GroupName);
+                model.Common.Message = Commons.ShowMessage("success", "Record saved successfully.");
+
+                return View("Index", model);
+            }
+            catch (Exception ex) {
+                var model = BuildModel(security.GroupName);
+                model.Common.Message = Commons.ShowMessage("danger", ex.Message);
+
+                return View("Index", model);
+            }
         }
 
 

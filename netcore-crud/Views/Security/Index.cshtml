@@ -4,8 +4,7 @@
 @model (CommonViewModel Common, SecurityModel Security)
 
 <div class="module-header">
-    @* HIDDEN FIELD *@
-    <input asp-for="Common.Mode" type="hidden" />
+
 
     <div class="module-title">
         <i class="bi bi-shield-lock-fill"></i>
@@ -29,11 +28,14 @@
 </div>
 
 <div class="container-fluid mt-3">
-
+	<!-- Message Alert -->
+	@Model.Common.Message
     <div class="card">
         <div class="card-body">
 
             <form asp-action="Save" id="formSave" method="post" class="d-inline">
+                @* HIDDEN FIELD *@
+                <input asp-for="Common.Mode" type="hidden" />
                 <div class="row">
                     <label class="col-md-1 form-label small fw-semibold mb-1">Group Name</label>
                     <div class="col-md-6">

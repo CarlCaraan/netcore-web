@@ -142,6 +142,90 @@ namespace netcore_crud.App_Code
         }
 
 
+        public static void SaveModule<T>(
+            IConfiguration configuration,
+            string tableName,
+            string pubPrimary,
+            T model,
+            string mode)
+        {
+            using SqlConnection myconn = new SqlConnection(configuration.GetConnectionString("NetCoreConnection"));
+            myconn.Open();
+            using SqlTransaction tran = myconn.BeginTransaction();
+            try
+            {
+                using SqlCommand cmd = new SqlCommand();
+                cmd.Connection = myconn;
+                cmd.Transaction = tran;
+
+                PropertyInfo[] props = typeof(T).GetProperties();
+
+                if (mode.Equals("NEW", StringComparison.OrdinalIgnoreCase))
+                {
+                    List<string> columns = new();
+                    List<string> parameters = new();
+
+                    foreach (PropertyInfo prop in props)
+                    {
+                        // Identity/Computed columns
+                        if (prop.Name.Equals("RowStamp", StringComparison.OrdinalIgnoreCase))
+                            continue;
+
+                        columns.Add(prop.Name);
+                        parameters.Add("@" + prop.Name);
+
+                        object value = prop.GetValue(model) ?? DBNull.Value;
+                        cmd.Parameters.AddWithValue("@" + prop.Name, value);
+                    }
+                    cmd.CommandText = $@"
+                INSERT INTO {tableName}
+                (
+                    {string.Join(",", columns)}
+                )
+                VALUES
+                (
+                    {string.Join(",", parameters)}
+                )";
+                }
+                else if (mode.Equals("EDIT", StringComparison.OrdinalIgnoreCase))
+                {
+                    List<string> setClause = new();
+
+                    foreach (PropertyInfo prop in props)
+                    {
+                        object value = prop.GetValue(model) ?? DBNull.Value;
+
+                        cmd.Parameters.AddWithValue("@" + prop.Name, value);
+
+                        if (prop.Name.Equals("RowStamp", StringComparison.OrdinalIgnoreCase))
+                            continue;
+
+                        if (prop.Name.Equals(pubPrimary, StringComparison.OrdinalIgnoreCase)) //Skip para hindi ma-edit yung primary column
+                            continue;
+                        setClause.Add($"{prop.Name}=@{prop.Name}");
+                    }
+
+                    cmd.CommandText = $@"
+                UPDATE {tableName}
+                SET {string.Join(",", setClause)}
+                WHERE {pubPrimary}=@{pubPrimary}";
+                }
+                else
+                {
+                    throw new Exception("Invalid save mode.");
+                }
+
+                cmd.ExecuteNonQuery();
+                tran.Commit();
+            }
+            catch
+            {
+                tran.Rollback();
+                throw;
+            }
+        }
+
+
 
 
 

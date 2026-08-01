@@ -1,11 +1,12 @@
-﻿using System.Data;
+﻿using Microsoft.AspNetCore.Html;
+using System.Data;
 
 namespace netcore_crud.Models
 {
     public class CommonViewModel
     {
         // Record State
-        public string Mode { get; set; } = "VIEW";
+        public string Mode { get; set; } = "";
         public string Status
         {
             get
@@ -24,7 +25,7 @@ namespace netcore_crud.Models
         public bool IsEdit => Mode == "EDIT";
 
         // Common Messages
-        public string Message { get; set; } = string.Empty;
+        public HtmlString Message { get; set; }
         public bool HasError { get; set; }
 
         // Search / Paging (para sa List/Search modules)
