@@ -65,16 +65,16 @@ namespace netcore_crud.Controllers
 
 
 
-        private (CommonViewModel Common, SecurityModel Security) BuildModel(long? rowStamp)
+        private (CommonViewModel Common, SecurityModel Security) BuildModel(String PubPrimaryValue)
         {
             var model = Commons.LoadModule<SecurityModel>(
                 _configuration,
                 PubTableName,
                 PubPrimary,
-                rowStamp);
+                PubPrimaryValue);
 
             //Load Detail Table
-            if (rowStamp != null)
+            if (!string.IsNullOrWhiteSpace(PubPrimaryValue))
             {
                 model.Common.UserAuthority = Commons.LoadModuleDetail<UserAuthorityModel>(
                     _configuration,
@@ -93,10 +93,10 @@ namespace netcore_crud.Controllers
             return model;
         }
 
-        [HttpGet("{rowStamp?}")]
-        public IActionResult Index(long? rowStamp)
+        [HttpGet("{PubPrimaryValue?}")]
+        public IActionResult Index(string PubPrimaryValue)
         {
-            return View(BuildModel(rowStamp));
+            return View(BuildModel(PubPrimaryValue));
         }
 
 
@@ -122,17 +122,35 @@ namespace netcore_crud.Controllers
         }
 
 
+        [HttpPost("save")]
+        public IActionResult Save(CommonViewModel common, SecurityModel security)
+        {
+            if (common.Mode == "NEW")
+            {
+                // INSERT
+            }
+            else if (common.Mode == "EDIT")
+            {
+                // UPDATE
+            }
+
+            var model = BuildModel(security.GroupName);
+
+            return View("Index", model);
+        }
+
 
         [HttpPost("select")]
-        public IActionResult Select(long rowStamp)
+        public IActionResult Select(String PubPrimaryValue)
         {
             //var model = Commons.LoadModule<SecurityModel>(
             //    _configuration,
             //    "GroupName",
             //    rowStamp);
 
-            return RedirectToAction(nameof(Index), new { rowStamp });
+            return RedirectToAction(nameof(Index), new { PubPrimaryValue });
         }
+
 
 
         [HttpPost("searchviewlist")]

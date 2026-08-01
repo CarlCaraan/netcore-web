@@ -42,8 +42,8 @@ namespace netcore_crud.App_Code
             IConfiguration configuration,
             string TableName,
             string PubPrimary,
-            long? rowStamp = null,
-            string search = "")
+            string PubPrimaryValue,
+            string search = "")//Search
             where T : new()
         {
             var common = new CommonViewModel();
@@ -78,12 +78,12 @@ namespace netcore_crud.App_Code
             common.ViewList = dt;
 
             // Load Selected Record
-            if (rowStamp.HasValue)
+            if (!string.IsNullOrWhiteSpace(PubPrimaryValue))
             {
-                string sqlRecord = $"SELECT * FROM {TableName} WHERE RowStamp = @RowStamp";
+                string sqlRecord = $"SELECT * FROM {TableName} WHERE {PubPrimary} = @PubPrimary";
 
                 using SqlCommand cmd = new SqlCommand(sqlRecord, myconn);
-                cmd.Parameters.AddWithValue("@RowStamp", rowStamp.Value);
+                cmd.Parameters.AddWithValue("@PubPrimary", PubPrimaryValue);
 
                 myconn.Open();
 
