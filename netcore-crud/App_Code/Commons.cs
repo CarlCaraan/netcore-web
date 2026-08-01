@@ -1,23 +1,26 @@
 ﻿using Dapper;
 using Microsoft.AspNetCore.Html;
 using Microsoft.Data.SqlClient;
-using netcore_crud.Models;
+using netcore_crud.Models.Shared;
 using System.Data;
 using System.Reflection;
 
 namespace netcore_crud.App_Code
 {
+    // Shared helper methods para sa messages at generic database operations ng modules.
     public static class Commons
     {
+        // Gumagawa ng Bootstrap alert message na puwedeng ipakita sa view.
         public static HtmlString ShowMessage(string alertType, string message)
         {
+            // Piliin ang icon depende sa alert type (success, warning, danger, o info).
             string icon = alertType.ToLower() switch
             {
-                "success" => "fa-solid fa-circle-check",
-                "warning" => "fa-solid fa-triangle-exclamation",
-                "danger" => "fa-solid fa-circle-xmark",
-                "info" => "fa-solid fa-circle-info",
-                _ => "fa-solid fa-circle-info"
+                "success" => "bi bi-check-circle-fill",
+                "warning" => "bi bi-exclamation-triangle-fill",
+                "danger" => "bi bi-x-circle-fill",
+                "info" => "bi bi-info-circle-fill",
+                _ => "bi bi-info-circle-fill"
             };
 
             string html = $@"
@@ -31,27 +34,29 @@ namespace netcore_crud.App_Code
     </button>
 </div>";
 
+            // Ibalik ang formatted HTML para ma-render ng Razor bilang alert.
             return new HtmlString(html);
         }
 
 
 
 
-        // ========= LOAD MODULE MAIN TABLE =========
-        public static (CommonViewModel Common, T Model) LoadModule<T>(
+        // Naglo-load ng listahan at, kung meron, ang selected record ng isang module.
+        public static ModuleViewModel<T> LoadModule<T>(
             IConfiguration configuration,
             string TableName,
             string PubPrimary,
-            string PubPrimaryValue,
+            string? PubPrimaryValue,
             string search = "")//Search
             where T : new()
         {
+            // Ihanda ang default data para sa view bago kumuha sa database.
             var common = new CommonViewModel();
             var model = new T();
 
             using SqlConnection myconn = new SqlConnection(configuration.GetConnectionString("NetCoreConnection"));
 
-            // Load View List
+            // Kunin ang latest 30 records o i-filter gamit ang search input.
             string sql;
 
             if (string.IsNullOrWhiteSpace(search))
@@ -63,6 +68,7 @@ namespace netcore_crud.App_Code
                 sql = $@"  SELECT TOP 30 * FROM {TableName} WHERE {PubPrimary} LIKE @Search OR Description LIKE @Search ORDER BY RowStamp DESC";
             }
 
+            // SqlDataAdapter ang nagfi-fill ng listahan sa DataTable para sa view.
             DataTable dt = new();
 
             using SqlDataAdapter da = new SqlDataAdapter();
@@ -70,14 +76,16 @@ namespace netcore_crud.App_Code
 
             if (!string.IsNullOrWhiteSpace(search))
             {
+                // I-parameterize ang search text para safe ang value sa SQL query.
                 da.SelectCommand.Parameters.AddWithValue("@Search", $"%{search}%");
             }
 
             da.Fill(dt);
 
+            // I-save ang result list sa common view model.
             common.ViewList = dt;
 
-            // Load Selected Record
+            // Kapag may primary value, kunin din ang buong selected record.
             if (!string.IsNullOrWhiteSpace(PubPrimaryValue))
             {
                 string sqlRecord = $"SELECT * FROM {TableName} WHERE {PubPrimary} = @PubPrimary";
@@ -89,6 +97,7 @@ namespace netcore_crud.App_Code
 
                 using SqlDataReader dr = cmd.ExecuteReader();
 
+                // I-map ang database columns sa kaparehong property names ng model.
                 if (dr.Read())
                 {
                     foreach (PropertyInfo prop in typeof(T).GetProperties())
@@ -103,13 +112,21 @@ namespace netcore_crud.App_Code
                         prop.SetValue(model, value);
                     }
 
+                    // Ang selected record ay puwede nang i-edit sa view.
                     common.Mode = "EDIT";
+                    // Itago ang original identifier para ma-validate ito sa pag-save.
+                    common.OriginalPubPrimary = PubPrimaryValue;
                 }
             }
 
-            return (common, model);
+            return new ModuleViewModel<T>
+            {
+                Common = common,
+                Record = model
+            };
         }
 
+        // Tinitingnan kung may matching column bago mag-set ng model property.
         private static bool HasColumn(SqlDataReader reader, string columnName)
         {
             for (int i = 0; i < reader.FieldCount; i++)
@@ -121,10 +138,7 @@ namespace netcore_crud.App_Code
             return false;
         }
 
-
-
-
-
+        // Kinukuha ang detail rows na naka-link sa parent record gamit ang foreign key.
         public static List<T> LoadModuleDetail<T>(
         IConfiguration configuration,
         string tableName,
@@ -135,6 +149,7 @@ namespace netcore_crud.App_Code
 
             string sql = $"SELECT * FROM {tableName} WHERE {foreignKey} = @{foreignKey} ORDER BY RowStamp";
 
+            // I-map ng Dapper ang bawat row papunta sa generic detail model.
             return myconn.Query<T>(sql, new DynamicParameters(new Dictionary<string, object>
         {
         { foreignKey, foreignKeyValue }
@@ -142,32 +157,65 @@ namespace netcore_crud.App_Code
         }
 
 
+        /// <summary>
+        /// Nagse-save ng record: INSERT para sa NEW at UPDATE para sa EDIT.
+        /// </summary>
         public static void SaveModule<T>(
             IConfiguration configuration,
             string tableName,
             string pubPrimary,
             T model,
-            string mode)
+            string mode,
+            string? originalPubPrimary = null)
         {
+            // Isang connection at transaction para isang buo ang save process.
             using SqlConnection myconn = new SqlConnection(configuration.GetConnectionString("NetCoreConnection"));
             myconn.Open();
             using SqlTransaction tran = myconn.BeginTransaction();
             try
             {
+                // Isang command lang ang gagamitin sa loob ng active transaction.
                 using SqlCommand cmd = new SqlCommand();
                 cmd.Connection = myconn;
                 cmd.Transaction = tran;
 
+                // Kunin ang model properties para dynamic na mabuo ang SQL fields.
                 PropertyInfo[] props = typeof(T).GetProperties();
 
                 if (mode.Equals("NEW", StringComparison.OrdinalIgnoreCase))
                 {
+                    // Siguraduhing ang configured primary field ay nasa model.
+                    PropertyInfo? primaryProperty = props.FirstOrDefault(prop =>
+                        prop.Name.Equals(pubPrimary, StringComparison.OrdinalIgnoreCase));
+
+                    if (primaryProperty == null)
+                        throw new Exception($"The primary column '{pubPrimary}' was not found in the model.");
+
+                    object primaryValue = primaryProperty.GetValue(model) ?? DBNull.Value;
+
+                    // Required ang primary value bago makapag-save ng bagong record.
+                    if (primaryValue == DBNull.Value || string.IsNullOrWhiteSpace(primaryValue.ToString()))
+                        throw new Exception($"{pubPrimary} is required.");
+
+                    // I-check ang duplicate primary value bago mag-INSERT.
+                    cmd.CommandText = $@"
+                        SELECT COUNT_BIG(1)
+                        FROM {tableName} WITH (UPDLOCK, HOLDLOCK)
+                        WHERE {pubPrimary} = @DuplicatePubPrimary";
+                    cmd.Parameters.AddWithValue("@DuplicatePubPrimary", primaryValue);
+
+                    if (Convert.ToInt64(cmd.ExecuteScalar()) > 0)
+                        throw new Exception($"{pubPrimary} '{primaryValue}' already exists.");
+
+                    cmd.Parameters.Clear();
+
+                    // Buuin ang INSERT columns at parameters mula sa model properties.
                     List<string> columns = new();
                     List<string> parameters = new();
 
                     foreach (PropertyInfo prop in props)
                     {
-                        // Identity/Computed columns
+                        // Hindi sinasama ang auto-generated RowStamp column.
                         if (prop.Name.Equals("RowStamp", StringComparison.OrdinalIgnoreCase))
                             continue;
 
@@ -189,6 +237,23 @@ namespace netcore_crud.App_Code
                 }
                 else if (mode.Equals("EDIT", StringComparison.OrdinalIgnoreCase))
                 {
+                    // Kunin ang current primary value mula sa submitted model.
+                    PropertyInfo? primaryProperty = props.FirstOrDefault(prop =>
+                        prop.Name.Equals(pubPrimary, StringComparison.OrdinalIgnoreCase));
+
+                    if (primaryProperty == null)
+                        throw new Exception($"The primary column '{pubPrimary}' was not found in the model.");
+
+                    object primaryValue = primaryProperty.GetValue(model) ?? DBNull.Value;
+
+                    // Ang original value ang target ng edit; bawal itong palitan dahil unique identifier ito.
+                    if (string.IsNullOrWhiteSpace(originalPubPrimary) ||
+                        !string.Equals(Convert.ToString(primaryValue), originalPubPrimary, StringComparison.Ordinal))
+                    {
+                        throw new Exception($"{pubPrimary} cannot be changed.");
+                    }
+
+                    // Buuin ang fields na puwedeng i-update; excluded ang primary at RowStamp.
                     List<string> setClause = new();
 
                     foreach (PropertyInfo prop in props)
@@ -200,7 +265,7 @@ namespace netcore_crud.App_Code
                         if (prop.Name.Equals("RowStamp", StringComparison.OrdinalIgnoreCase))
                             continue;
 
-                        if (prop.Name.Equals(pubPrimary, StringComparison.OrdinalIgnoreCase)) //Skip para hindi ma-edit yung primary column
+                        if (prop.Name.Equals(pubPrimary, StringComparison.OrdinalIgnoreCase)) // Hindi dapat mabago ang primary column.
                             continue;
                         setClause.Add($"{prop.Name}=@{prop.Name}");
                     }
@@ -215,11 +280,13 @@ namespace netcore_crud.App_Code
                     throw new Exception("Invalid save mode.");
                 }
 
+                // I-execute ang INSERT/UPDATE, saka i-commit kapag successful.
                 cmd.ExecuteNonQuery();
                 tran.Commit();
             }
             catch
             {
+                // I-rollback lahat kapag may validation o database error.
                 tran.Rollback();
                 throw;
             }

@@ -2,19 +2,21 @@
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Data.SqlClient;
 using netcore_crud.App_Code;
-using netcore_crud.Models;
+using netcore_crud.Models.Security;
+using netcore_crud.Models.Shared;
 using System.Data;
 using System.Security.AccessControl;
 
 namespace netcore_crud.Controllers
 {
 
-
+    // Module para mag-manage ng security groups at kanilang permissions.
     [Route("sys-security")]
     public class SecurityController : BaseController
     {
         public string ModuleName = "SECURITY";
         public string ModuleAbbr = "SEC";
+        // Configuration ng main table at mga fields na ginagamit ng module.
         string PubTableName = "GroupName";
         string PubPrimary = "GroupName";
         string PubSecondary = "Description";
@@ -24,6 +26,7 @@ namespace netcore_crud.Controllers
 
         public SecurityController(IConfiguration configuration)
         {
+            // Database configuration na ipapasa sa shared module helpers.
             _configuration = configuration;
         }
 
@@ -65,28 +68,29 @@ namespace netcore_crud.Controllers
 
 
 
-        private (CommonViewModel Common, SecurityModel Security) BuildModel(String PubPrimaryValue)
+        // Binubuo ang main record at detail permissions para sa napiling group.
+        private ModuleViewModel<SecurityModel> BuildModel(string? pubPrimaryValue)
         {
             var model = Commons.LoadModule<SecurityModel>(
                 _configuration,
                 PubTableName,
                 PubPrimary,
-                PubPrimaryValue);
+                pubPrimaryValue);
 
-            //Load Detail Table
-            if (!string.IsNullOrWhiteSpace(PubPrimaryValue))
+            // Kapag may napiling group, isama ang related authority at menu records.
+            if (!string.IsNullOrWhiteSpace(pubPrimaryValue))
             {
                 model.Common.UserAuthority = Commons.LoadModuleDetail<UserAuthorityModel>(
                     _configuration,
                     "UserAuthority",
                     "GroupName",
-                    model.Model.GroupName);
+                    model.Record.GroupName);
 
                 model.Common.MenuChoice = Commons.LoadModuleDetail<MenuChoiceModel>(
                     _configuration,
                     "MenuChoice",
                     "GroupName",
-                    model.Model.GroupName);
+                    model.Record.GroupName);
 
             }
 
@@ -94,7 +98,8 @@ namespace netcore_crud.Controllers
         }
 
         [HttpGet("{PubPrimaryValue?}")]
-        public IActionResult Index(string PubPrimaryValue)
+        // Ipakita ang module; optional ang group name para sa selected record.
+        public IActionResult Index(string? PubPrimaryValue)
         {
             return View(BuildModel(PubPrimaryValue));
         }
@@ -102,6 +107,7 @@ namespace netcore_crud.Controllers
 
 
         [HttpPost("new")]
+        // Maghanda ng blank record na puwedeng i-save bilang bagong security group.
         public IActionResult New()
         {
             var model = BuildModel(null);
@@ -109,49 +115,59 @@ namespace netcore_crud.Controllers
             model.Common.Mode = "NEW";
             model.Common.IsReadOnly = false;
 
-            model.Security.CreatedBy = HttpContext.Session.GetString("UserName");
-            model.Security.CreatedDate = DateTime.Now;
-            model.Security.ModifiedBy = HttpContext.Session.GetString("UserName");
-            model.Security.ModifiedDate = DateTime.Now;
+            // I-set ang current user at timestamps para sa bagong record.
+            model.Record.CreatedBy = HttpContext.Session.GetString("UserName") ?? string.Empty;
+            model.Record.CreatedDate = DateTime.Now;
+            model.Record.ModifiedBy = HttpContext.Session.GetString("UserName") ?? string.Empty;
+            model.Record.ModifiedDate = DateTime.Now;
 
-            model.Security.GroupName = "";
-            model.Security.Description = "";
-            model.Security.CanChangePW = false;
+            // Default values ng fields sa bagong group.
+            model.Record.GroupName = "";
+            model.Record.Description = "";
+            model.Record.CanChangePW = false;
 
             return View("Index", model);
         }
 
 
         [HttpPost("save")]
-        public IActionResult Save(
-        [Bind(Prefix = "Item1")] CommonViewModel common,
-        [Bind(Prefix = "Item2")] SecurityModel security)
+        // I-save ang bagong group o update sa existing group.
+        public IActionResult Save(ModuleViewModel<SecurityModel> model)
         {
             try
             {
-                Commons.SaveModule(_configuration, PubTableName, PubPrimary, security, common.Mode);
+                // SaveModule ang may duplicate primary-value validation at database transaction.
+                Commons.SaveModule(
+                    _configuration,
+                    PubTableName,
+                    PubPrimary,
+                    model.Record,
+                    model.Common.Mode,
+                    model.Common.OriginalPubPrimary);
 
                 //Commons.InsertModuleDetail<UserAuthorityModel>(
                 //    _configuration,
                 //    "UserAuthority",
                 //    "GroupName",
-                //    security.GroupName,
-                //    common.UserAuthority);
+                //    model.Record.GroupName,
+                //    model.Common.UserAuthority);
 
                 //Commons.InsertModuleDetail<MenuChoiceModel>(
                 //    _configuration,
                 //    "MenuChoice",
                 //    "GroupName",
-                //    security.GroupName,
-                //    common.MenuChoice);
+                //    model.Record.GroupName,
+                //    model.Common.MenuChoice);
 
-                var model = BuildModel(security.GroupName);
-                model.Common.Message = Commons.ShowMessage("success", "Record saved successfully.");
+                // I-reload ang saved data bago magpakita ng success message.
+                var viewModel = BuildModel(model.Record.GroupName);
+                viewModel.Common.Message = Commons.ShowMessage("success", "Record saved successfully.");
 
-                return View("Index", model);
+                return View("Index", viewModel);
             }
-            catch (Exception ex) {
-                var model = BuildModel(security.GroupName);
+            catch (Exception ex)
+            {
+                // Ibalik ang form kasama ang validation o database error.
                 model.Common.Message = Commons.ShowMessage("danger", ex.Message);
 
                 return View("Index", model);
@@ -160,6 +176,7 @@ namespace netcore_crud.Controllers
 
 
         [HttpPost("select")]
+        // I-redirect sa selected group para ma-load ang complete record details.
         public IActionResult Select(String PubPrimaryValue)
         {
             //var model = Commons.LoadModule<SecurityModel>(
@@ -173,18 +190,20 @@ namespace netcore_crud.Controllers
 
 
         [HttpPost("searchviewlist")]
-        public IActionResult SearchViewList([FromForm(Name = "Item1.txtSearch")] string txtSearch)
+        // I-filter ang listahan ng groups gamit ang search text mula sa modal/list view.
+        public IActionResult SearchViewList(ModuleViewModel<SecurityModel> model)
         {
-            var model = Commons.LoadModule<SecurityModel>(
+            var viewModel = Commons.LoadModule<SecurityModel>(
                 _configuration,
                 PubTableName,
                 PubPrimary,
                 null,
-                txtSearch);
+                model.Common.txtSearch);
 
-            model.Common.txtSearch = txtSearch;
+            // Ibalik ang modal at panatilihin ang search keyword sa screen.
+            viewModel.Common.txtSearch = model.Common.txtSearch;
             ViewBag.ShowModal = true;
-            return View("Index", model);
+            return View("Index", viewModel);
         }
 
 

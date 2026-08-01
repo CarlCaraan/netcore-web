@@ -1,4 +1,4 @@
-﻿namespace netcore_crud.Models
+namespace netcore_crud.Models.Security
 {
     public class MenuChoiceModel
     {

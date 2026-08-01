@@ -9,6 +9,7 @@ using netcore_crud.App_Code;
 
 namespace netcore_crud.Controllers
 {
+    // Humahawak sa login, logout, at pag-log ng user activity.
     public class LoginController : Controller
     {
         private readonly IConfiguration _configuration;
@@ -17,11 +18,13 @@ namespace netcore_crud.Controllers
 
         public LoginController(ILogger<LoginController> logger, IConfiguration configuration)
         {
+            // Kunin ang logger at database settings na ginagamit ng controller.
             _logger = logger;
             _configuration = configuration;
         }
 
         [HttpGet]
+        // Ipakita ang login form.
         public IActionResult Index()
         {
             return View();
@@ -29,8 +32,10 @@ namespace netcore_crud.Controllers
 
 
         [HttpPost]
+        // I-validate ang login credentials at gumawa ng session kapag valid.
         public IActionResult Index(string Username, string Password)
         {
+            // Kunin ang database connection na naka-configure sa appsettings.
             string connStr = _configuration.GetConnectionString("NetCoreConnection");
 
             if (string.IsNullOrEmpty(connStr))
@@ -40,6 +45,7 @@ namespace netcore_crud.Controllers
 
             using SqlConnection myconn = new SqlConnection(connStr);
 
+            // Hanapin ang user at i-compare ang decrypted password sa input password.
             string sql = @"SELECT GroupName, ISNULL(Hold,0) AS Hold FROM LoginNames WHERE UserName = @UserName AND CONVERT(VARCHAR(100), DECRYPTBYPASSPHRASE('PHILSOFT', Password)) = @Password";
 
             var user = myconn.QueryFirstOrDefault<LoginResult>(
@@ -52,13 +58,17 @@ namespace netcore_crud.Controllers
 
             if (user != null)
             {
+                // Hindi puwedeng mag-login ang account na naka-hold.
                 if ((bool)user.Hold == false)
                 {
+                    // I-save ang user details sa session para magamit sa protected pages.
                     HttpContext.Session.SetString("UserName", Username);
                     HttpContext.Session.SetString("GroupName", user.GroupName);
 
+                    // Mag-record ng successful login sa USERLOGS table.
                     InsertLoginLogs(Username);
 
+                    // Iba ang landing page ng Administrator.
                     if (Username.ToUpper() == "ADMINISTRATOR")
                     {
                         //return Redirect("/login-success");
@@ -68,15 +78,18 @@ namespace netcore_crud.Controllers
                     return RedirectToAction("Dashboard", "Dashboard");
                 }
 
+                // Ipakita ang dahilan kung bakit hindi pinapayagang mag-login.
                 ViewBag.Message = Commons.ShowMessage("warning", "Username is on hold!");
                 return View();
             }
 
+            // Walang nahanap na matching username at password.
             ViewBag.Message = Commons.ShowMessage("danger", "Invalid Username or Password!");
 
             return View();
         }
 
+        // Nagse-save ng login date at time para sa audit trail.
         private void InsertLoginLogs(string Username)
         {
             string connStr = _configuration.GetConnectionString("NetCoreConnection");
@@ -95,12 +108,14 @@ namespace netcore_crud.Controllers
                 });
         }
 
+        // I-log ang logout, linisin ang session, saka bumalik sa login page.
         public IActionResult Logout()
         {
             string? userName = HttpContext.Session.GetString("UserName");
 
             if (!string.IsNullOrEmpty(userName))
             {
+                // May username lang na dapat i-log bago i-clear ang session.
                 InsertLogoutLogs(userName);
             }
 
@@ -109,6 +124,7 @@ namespace netcore_crud.Controllers
             return RedirectToAction("Index", "Login");
         }
 
+        // Nagse-save ng logout date at time para sa audit trail.
         private void InsertLogoutLogs(string userName)
         {
             string connStr = _configuration.GetConnectionString("NetCoreConnection")!;
@@ -129,6 +145,7 @@ namespace netcore_crud.Controllers
 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        // Default error page; walang cache para laging fresh ang error details.
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
