@@ -160,9 +160,7 @@ namespace netcore_crud.App_Code
         }
 
 
-
-
-        /// <summary>
+        /// <summary> DAPPER method para mag-save ng record sa database gamit ang generic model.
         /// Nagse-save ng record: INSERT para sa NEW at UPDATE para sa EDIT.
         /// </summary>
         public static void SaveModule<T>(
@@ -173,129 +171,264 @@ namespace netcore_crud.App_Code
             string mode,
             string? originalPubPrimary = null)
         {
-            // Isang connection at transaction para isang buo ang save process.
+            // Gumamit ng isang connection at transaction para isang buong process ang save.
             using SqlConnection myconn = new SqlConnection(configuration.GetConnectionString("NetCoreConnection"));
             myconn.Open();
+
             using SqlTransaction tran = myconn.BeginTransaction();
+
             try
             {
-                // Isang command lang ang gagamitin sa loob ng active transaction.
-                using SqlCommand cmd = new SqlCommand();
-                cmd.Connection = myconn;
-                cmd.Transaction = tran;
-
-                // Kunin ang model properties para dynamic na mabuo ang SQL fields.
+                // Kunin lahat ng properties ng model para makagawa ng dynamic SQL.
                 PropertyInfo[] props = typeof(T).GetProperties();
 
                 if (mode.Equals("NEW", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Siguraduhing ang configured primary field ay nasa model.
-                    PropertyInfo? primaryProperty = props.FirstOrDefault(prop =>
-                        prop.Name.Equals(pubPrimary, StringComparison.OrdinalIgnoreCase));
+                    // Hanapin ang configured primary key sa model.
+                    PropertyInfo? primaryProperty = props.FirstOrDefault(x =>
+                        x.Name.Equals(pubPrimary, StringComparison.OrdinalIgnoreCase));
 
                     if (primaryProperty == null)
                         throw new Exception($"The primary column '{pubPrimary}' was not found in the model.");
 
-                    object primaryValue = primaryProperty.GetValue(model) ?? DBNull.Value;
+                    object? primaryValue = primaryProperty.GetValue(model);
 
-                    // Required ang primary value bago makapag-save ng bagong record.
-                    if (primaryValue == DBNull.Value || string.IsNullOrWhiteSpace(primaryValue.ToString()))
+                    // Required ang primary value bago mag-save.
+                    if (primaryValue == null || string.IsNullOrWhiteSpace(primaryValue.ToString()))
                         throw new Exception($"{pubPrimary} is required.");
 
-                    // I-check ang duplicate primary value bago mag-INSERT.
-                    cmd.CommandText = $@"
-                        SELECT COUNT_BIG(1)
-                        FROM {tableName} WITH (UPDLOCK, HOLDLOCK)
-                        WHERE {pubPrimary} = @DuplicatePubPrimary";
-                    cmd.Parameters.AddWithValue("@DuplicatePubPrimary", primaryValue);
+                    // I-check muna kung may existing record na may parehong primary value.
+                    string checkSql = $@"
+                    SELECT COUNT_BIG(1)
+                    FROM {tableName} WITH (UPDLOCK, HOLDLOCK)
+                    WHERE {pubPrimary} = @PrimaryValue";
 
-                    if (Convert.ToInt64(cmd.ExecuteScalar()) > 0)
+                    long duplicate = myconn.ExecuteScalar<long>(
+                        checkSql,
+                        new { PrimaryValue = primaryValue },
+                        tran);
+
+                    if (duplicate > 0)
                         throw new Exception($"{pubPrimary} '{primaryValue}' already exists.");
 
-                    cmd.Parameters.Clear();
-
-                    // Buuin ang INSERT columns at parameters mula sa model properties.
+                    // Dynamic na buuin ang listahan ng columns at parameters.
                     List<string> columns = new();
                     List<string> parameters = new();
 
                     foreach (PropertyInfo prop in props)
                     {
-                        // Hindi sinasama ang auto-generated RowStamp column.
+                        // Skip ang auto-generated RowStamp.
                         if (prop.Name.Equals("RowStamp", StringComparison.OrdinalIgnoreCase))
                             continue;
 
                         columns.Add(prop.Name);
                         parameters.Add("@" + prop.Name);
-
-                        object value = prop.GetValue(model) ?? DBNull.Value;
-                        cmd.Parameters.AddWithValue("@" + prop.Name, value);
                     }
-                    cmd.CommandText = $@"
-                INSERT INTO {tableName}
-                (
-                    {string.Join(",", columns)}
-                )
-                VALUES
-                (
-                    {string.Join(",", parameters)}
-                )";
+
+                    // Dynamic INSERT statement.
+                    string insertSql = $@"
+                    INSERT INTO {tableName}
+                    (
+                        {string.Join(",", columns)}
+                    )
+                    VALUES
+                    (
+                        {string.Join(",", parameters)}
+                    )";
+
+                    // Automatic na imi-map ni Dapper ang model properties sa SQL parameters.
+                    myconn.Execute(insertSql, model, tran);
                 }
                 else if (mode.Equals("EDIT", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Kunin ang current primary value mula sa submitted model.
-                    PropertyInfo? primaryProperty = props.FirstOrDefault(prop =>
-                        prop.Name.Equals(pubPrimary, StringComparison.OrdinalIgnoreCase));
+                    // Hanapin ang primary key property.
+                    PropertyInfo? primaryProperty = props.FirstOrDefault(x =>
+                        x.Name.Equals(pubPrimary, StringComparison.OrdinalIgnoreCase));
 
                     if (primaryProperty == null)
                         throw new Exception($"The primary column '{pubPrimary}' was not found in the model.");
 
-                    object primaryValue = primaryProperty.GetValue(model) ?? DBNull.Value;
+                    object? primaryValue = primaryProperty.GetValue(model);
 
-                    // Ang original value ang target ng edit; bawal itong palitan dahil unique identifier ito.
-                    if (string.IsNullOrWhiteSpace(originalPubPrimary) ||
-                        !string.Equals(Convert.ToString(primaryValue), originalPubPrimary, StringComparison.Ordinal))
-                    {
+                    // Hindi pinapayagang baguhin ang primary key.
+                    if (!string.Equals(primaryValue?.ToString(), originalPubPrimary, StringComparison.Ordinal))
                         throw new Exception($"{pubPrimary} cannot be changed.");
-                    }
 
-                    // Buuin ang fields na puwedeng i-update; excluded ang primary at RowStamp.
+                    // Dynamic na buuin ang SET clause.
                     List<string> setClause = new();
 
                     foreach (PropertyInfo prop in props)
                     {
-                        object value = prop.GetValue(model) ?? DBNull.Value;
-
-                        cmd.Parameters.AddWithValue("@" + prop.Name, value);
-
+                        // Skip ang RowStamp.
                         if (prop.Name.Equals("RowStamp", StringComparison.OrdinalIgnoreCase))
                             continue;
 
-                        if (prop.Name.Equals(pubPrimary, StringComparison.OrdinalIgnoreCase)) // Hindi dapat mabago ang primary column.
+                        // Skip din ang primary key dahil hindi ito dapat ma-update.
+                        if (prop.Name.Equals(pubPrimary, StringComparison.OrdinalIgnoreCase))
                             continue;
+
                         setClause.Add($"{prop.Name}=@{prop.Name}");
                     }
 
-                    cmd.CommandText = $@"
-                UPDATE {tableName}
-                SET {string.Join(",", setClause)}
-                WHERE {pubPrimary}=@{pubPrimary}";
+                    // Dynamic UPDATE statement.
+                    string updateSql = $@"
+                    UPDATE {tableName}
+                    SET {string.Join(",", setClause)}
+                    WHERE {pubPrimary} = @{pubPrimary}";
+
+                    // Automatic parameter mapping ni Dapper.
+                    myconn.Execute(updateSql, model, tran);
                 }
                 else
                 {
                     throw new Exception("Invalid save mode.");
                 }
 
-                // I-execute ang INSERT/UPDATE, saka i-commit kapag successful.
-                cmd.ExecuteNonQuery();
+                // I-commit ang transaction kapag walang error.
                 tran.Commit();
             }
             catch
             {
-                // I-rollback lahat kapag may validation o database error.
+                // I-rollback ang buong transaction kapag may error.
                 tran.Rollback();
                 throw;
             }
         }
+
+        /// <summary> ADO.NET method para mag-save ng record sa database gamit ang generic model.
+        /// Nagse-save ng record: INSERT para sa NEW at UPDATE para sa EDIT.
+        /// </summary>
+        //public static void SaveModule<T>(
+        //    IConfiguration configuration,
+        //    string tableName,
+        //    string pubPrimary,
+        //    T model,
+        //    string mode,
+        //    string? originalPubPrimary = null)
+        //{
+        //    // Isang connection at transaction para isang buo ang save process.
+        //    using SqlConnection myconn = new SqlConnection(configuration.GetConnectionString("NetCoreConnection"));
+        //    myconn.Open();
+        //    using SqlTransaction tran = myconn.BeginTransaction();
+        //    try
+        //    {
+        //        // Isang command lang ang gagamitin sa loob ng active transaction.
+        //        using SqlCommand cmd = new SqlCommand();
+        //        cmd.Connection = myconn;
+        //        cmd.Transaction = tran;
+
+        //        // Kunin ang model properties para dynamic na mabuo ang SQL fields.
+        //        PropertyInfo[] props = typeof(T).GetProperties();
+
+        //        if (mode.Equals("NEW", StringComparison.OrdinalIgnoreCase))
+        //        {
+        //            // Siguraduhing ang configured primary field ay nasa model.
+        //            PropertyInfo? primaryProperty = props.FirstOrDefault(prop =>
+        //                prop.Name.Equals(pubPrimary, StringComparison.OrdinalIgnoreCase));
+
+        //            if (primaryProperty == null)
+        //                throw new Exception($"The primary column '{pubPrimary}' was not found in the model.");
+
+        //            object primaryValue = primaryProperty.GetValue(model) ?? DBNull.Value;
+
+        //            // Required ang primary value bago makapag-save ng bagong record.
+        //            if (primaryValue == DBNull.Value || string.IsNullOrWhiteSpace(primaryValue.ToString()))
+        //                throw new Exception($"{pubPrimary} is required.");
+
+        //            // I-check ang duplicate primary value bago mag-INSERT.
+        //            cmd.CommandText = $@"
+        //                SELECT COUNT_BIG(1)
+        //                FROM {tableName} WITH (UPDLOCK, HOLDLOCK)
+        //                WHERE {pubPrimary} = @DuplicatePubPrimary";
+        //            cmd.Parameters.AddWithValue("@DuplicatePubPrimary", primaryValue);
+
+        //            if (Convert.ToInt64(cmd.ExecuteScalar()) > 0)
+        //                throw new Exception($"{pubPrimary} '{primaryValue}' already exists.");
+
+        //            cmd.Parameters.Clear();
+
+        //            // Buuin ang INSERT columns at parameters mula sa model properties.
+        //            List<string> columns = new();
+        //            List<string> parameters = new();
+
+        //            foreach (PropertyInfo prop in props)
+        //            {
+        //                // Hindi sinasama ang auto-generated RowStamp column.
+        //                if (prop.Name.Equals("RowStamp", StringComparison.OrdinalIgnoreCase))
+        //                    continue;
+
+        //                columns.Add(prop.Name);
+        //                parameters.Add("@" + prop.Name);
+
+        //                object value = prop.GetValue(model) ?? DBNull.Value;
+        //                cmd.Parameters.AddWithValue("@" + prop.Name, value);
+        //            }
+        //            cmd.CommandText = $@"
+        //        INSERT INTO {tableName}
+        //        (
+        //            {string.Join(",", columns)}
+        //        )
+        //        VALUES
+        //        (
+        //            {string.Join(",", parameters)}
+        //        )";
+        //        }
+        //        else if (mode.Equals("EDIT", StringComparison.OrdinalIgnoreCase))
+        //        {
+        //            // Kunin ang current primary value mula sa submitted model.
+        //            PropertyInfo? primaryProperty = props.FirstOrDefault(prop =>
+        //                prop.Name.Equals(pubPrimary, StringComparison.OrdinalIgnoreCase));
+
+        //            if (primaryProperty == null)
+        //                throw new Exception($"The primary column '{pubPrimary}' was not found in the model.");
+
+        //            object primaryValue = primaryProperty.GetValue(model) ?? DBNull.Value;
+
+        //            // Ang original value ang target ng edit; bawal itong palitan dahil unique identifier ito.
+        //            if (string.IsNullOrWhiteSpace(originalPubPrimary) ||
+        //                !string.Equals(Convert.ToString(primaryValue), originalPubPrimary, StringComparison.Ordinal))
+        //            {
+        //                throw new Exception($"{pubPrimary} cannot be changed.");
+        //            }
+
+        //            // Buuin ang fields na puwedeng i-update; excluded ang primary at RowStamp.
+        //            List<string> setClause = new();
+
+        //            foreach (PropertyInfo prop in props)
+        //            {
+        //                object value = prop.GetValue(model) ?? DBNull.Value;
+
+        //                cmd.Parameters.AddWithValue("@" + prop.Name, value);
+
+        //                if (prop.Name.Equals("RowStamp", StringComparison.OrdinalIgnoreCase))
+        //                    continue;
+
+        //                if (prop.Name.Equals(pubPrimary, StringComparison.OrdinalIgnoreCase)) // Hindi dapat mabago ang primary column.
+        //                    continue;
+        //                setClause.Add($"{prop.Name}=@{prop.Name}");
+        //            }
+
+        //            cmd.CommandText = $@"
+        //        UPDATE {tableName}
+        //        SET {string.Join(",", setClause)}
+        //        WHERE {pubPrimary}=@{pubPrimary}";
+        //        }
+        //        else
+        //        {
+        //            throw new Exception("Invalid save mode.");
+        //        }
+
+        //        // I-execute ang INSERT/UPDATE, saka i-commit kapag successful.
+        //        cmd.ExecuteNonQuery();
+        //        tran.Commit();
+        //    }
+        //    catch
+        //    {
+        //        // I-rollback lahat kapag may validation o database error.
+        //        tran.Rollback();
+        //        throw;
+        //    }
+        //}
 
 
 
