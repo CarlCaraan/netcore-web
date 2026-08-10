@@ -38,7 +38,7 @@ namespace netcore_crud.Models.Shared
         // Default na editable ang fields kapag unang binuksan ang module.
         public bool IsReadOnly { get; set; } = false;
 
-        // Security detail tables
+        // SECURITY MODUULE DETAIL TABLES
         public List<UserAuthorityModel> UserAuthority { get; set; } = new();
         public List<MenuChoiceModel> MenuChoice { get; set; } = new();
     }

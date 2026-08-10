@@ -143,20 +143,24 @@ namespace netcore_crud.App_Code
 
         // Kinukuha ang detail rows na naka-link sa parent record gamit ang foreign key.
         public static List<T> LoadModuleDetail<T>(
-        IConfiguration configuration,
-        string tableName,
-        string foreignKey,
-        object foreignKeyValue)
+            IConfiguration configuration,
+            string tableName,
+            string foreignKey,
+            object foreignKeyValue)
         {
-            using SqlConnection myconn = new SqlConnection(configuration.GetConnectionString("NetCoreConnection"));
+            using SqlConnection myconn = new SqlConnection(
+                configuration.GetConnectionString("NetCoreConnection"));
 
             string sql = $"SELECT * FROM {tableName} WHERE {foreignKey} = @{foreignKey} ORDER BY RowStamp";
 
             // I-map ng Dapper ang bawat row papunta sa generic detail model.
-            return myconn.Query<T>(sql, new DynamicParameters(new Dictionary<string, object>
-        {
-        { foreignKey, foreignKeyValue }
-        })).ToList();
+            return myconn.Query<T>(
+                sql,
+                new DynamicParameters(new Dictionary<string, object>
+                {
+            { foreignKey, foreignKeyValue }
+                })
+            ).ToList();
         }
 
 
