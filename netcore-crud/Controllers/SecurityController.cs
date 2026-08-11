@@ -145,12 +145,14 @@ namespace netcore_crud.Controllers
                     model.Common.Mode,
                     model.Common.OriginalPubPrimary);
 
-                //Commons.InsertModuleDetail<UserAuthorityModel>(
-                //    _configuration,
-                //    "UserAuthority",
-                //    "GroupName",
-                //    model.Record.GroupName,
-                //    model.Common.UserAuthority);
+                Commons.SaveModuleDetail(
+                    _configuration,
+                    "UserAuthority",
+                    "GroupName",
+                    model.Record.GroupName,
+                    model.Common.Mode,
+                    model.Common.UserAuthority);
+
 
                 //Commons.InsertModuleDetail<MenuChoiceModel>(
                 //    _configuration,

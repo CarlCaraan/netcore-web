@@ -1,6 +1,8 @@
 ﻿using Dapper;
 using Microsoft.AspNetCore.Html;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using netcore_crud.Models.Security;
 using netcore_crud.Models.Shared;
 using System.Data;
 using System.Reflection;
@@ -158,7 +160,7 @@ namespace netcore_crud.App_Code
                 sql,
                 new DynamicParameters(new Dictionary<string, object>
                 {
-            { foreignKey, foreignKeyValue }
+                    { foreignKey, foreignKeyValue }
                 })
             ).ToList();
         }
@@ -434,7 +436,65 @@ namespace netcore_crud.App_Code
         //    }
         //}
 
+        [HttpPost]
+        public static void SaveModuleDetail(
+            IConfiguration configuration,
+            string tableName,
+            string foreignKeyColumn,
+            object foreignKeyValue,
+            string mode,
+            List<UserAuthorityModel>? details = null)
+        {
+            using SqlConnection myconn = new(configuration.GetConnectionString("NetCoreConnection"));
+            myconn.Open();
 
+            using SqlTransaction transaction = myconn.BeginTransaction();
+
+            try
+            {
+                if (mode.Equals("NEW", StringComparison.OrdinalIgnoreCase))
+                {
+                    using SqlCommand mycmd = myconn.CreateCommand();
+                    mycmd.Transaction = transaction;
+                    mycmd.CommandText = $"INSERT INTO [{tableName}] ([Reads], [Inserts], [Edits], [Deletes], [{foreignKeyColumn}], [Application], [Active]) SELECT 1, 1, 1, 1, @ForeignKeyValue, [Application], 1 FROM [{tableName}] WHERE [{foreignKeyColumn}] = 'ADMINISTRATOR'";
+                    mycmd.Parameters.AddWithValue("@ForeignKeyValue", foreignKeyValue ?? DBNull.Value);
+                    mycmd.ExecuteNonQuery();
+                }
+                else if (mode.Equals("EDIT", StringComparison.OrdinalIgnoreCase))
+                {
+                    using SqlCommand mycmd = myconn.CreateCommand();
+                    mycmd.Transaction = transaction;
+                    mycmd.CommandText = $"DELETE FROM [{tableName}] WHERE [{foreignKeyColumn}] = @ForeignKeyValue";
+                    mycmd.Parameters.AddWithValue("@ForeignKeyValue", foreignKeyValue ?? DBNull.Value);
+                    mycmd.ExecuteNonQuery();
+
+                    if (details != null)
+                    {
+                        foreach (UserAuthorityModel item in details)
+                        {
+                            using SqlCommand insertCmd = myconn.CreateCommand();
+                            insertCmd.Transaction = transaction;
+                            insertCmd.CommandText = $"INSERT INTO [{tableName}] ([Reads], [Inserts], [Edits], [Deletes], [{foreignKeyColumn}], [Application], [Active]) VALUES (@Reads, @Inserts, @Edits, @Deletes, @ForeignKeyValue, @Application, @Active)";
+                            insertCmd.Parameters.AddWithValue("@Reads", item.Reads);
+                            insertCmd.Parameters.AddWithValue("@Inserts", item.Inserts);
+                            insertCmd.Parameters.AddWithValue("@Edits", item.Edits);
+                            insertCmd.Parameters.AddWithValue("@Deletes", item.Deletes);
+                            insertCmd.Parameters.AddWithValue("@ForeignKeyValue", foreignKeyValue ?? DBNull.Value);
+                            insertCmd.Parameters.AddWithValue("@Application", item.Application ?? "");
+                            insertCmd.Parameters.AddWithValue("@Active", item.Active);
+                            insertCmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
 
 
 

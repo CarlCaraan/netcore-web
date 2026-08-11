@@ -84,17 +84,35 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @if (Model.Common.UserAuthority != null && Model.Common.UserAuthority.Any())
+                                    @if (Model.Common.UserAuthority.Any())
                                     {
-                                        foreach (var item in Model.Common.UserAuthority)
+                                        for (int i = 0; i < Model.Common.UserAuthority.Count; i++)
                                         {
                                             <tr>
-                                                <td>@item.Application</td>
-                                                <td class="text-center"><input class="form-check-input" type="checkbox" checked="@item.Reads" /></td>
-                                                <td class="text-center"><input class="form-check-input" type="checkbox" checked="@item.Inserts" /></td>
-                                                <td class="text-center"><input class="form-check-input" type="checkbox" checked="@item.Edits" /></td>
-                                                <td class="text-center"><input class="form-check-input" type="checkbox" checked="@item.Deletes" /></td>
-                                                <td class="text-center"><input class="form-check-input" type="checkbox" checked="@(item.Active ?? false)" /></td>
+                                                <td>
+                                                    @Model.Common.UserAuthority[i].Application
+                                                    <input type="hidden" asp-for="Common.UserAuthority[i].Application" />
+                                                </td>
+
+                                                <td class="text-center">
+                                                    <input type="checkbox" asp-for="Common.UserAuthority[i].Reads" class="form-check-input" />
+                                                </td>
+
+                                                <td class="text-center">
+                                                    <input type="checkbox" asp-for="Common.UserAuthority[i].Inserts" class="form-check-input" />
+                                                </td>
+
+                                                <td class="text-center">
+                                                    <input type="checkbox" asp-for="Common.UserAuthority[i].Edits" class="form-check-input" />
+                                                </td>
+
+                                                <td class="text-center">
+                                                    <input type="checkbox" asp-for="Common.UserAuthority[i].Deletes" class="form-check-input" />
+                                                </td>
+
+                                                <td class="text-center">
+                                                    <input type="checkbox" asp-for="Common.UserAuthority[i].Active" class="form-check-input" />
+                                                </td>
                                             </tr>
                                         }
                                     }
