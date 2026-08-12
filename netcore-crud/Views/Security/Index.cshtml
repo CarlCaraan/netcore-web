@@ -28,8 +28,8 @@
 </div>
 
 <div class="container-fluid mt-3">
-	<!-- Message Alert -->
-	@Model.Common.Message
+    <!-- Message Alert -->
+    @Model.Common.Message
     <div class="card">
         <div class="card-body">
 
@@ -181,7 +181,7 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-semibold mb-1">Modified By</label>
-                        <input asp-for="Record.ModifiedBy" class="form-control form-control-sm" readonly="@Model.Common.IsAuditReadOnly"  />
+                        <input asp-for="Record.ModifiedBy" class="form-control form-control-sm" readonly="@Model.Common.IsAuditReadOnly" />
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-semibold mb-1">Modified Date</label>
@@ -264,7 +264,7 @@
                                         <tr>
                                             <td class="text-center">
                                                 <form asp-action="Select" method="post" class="d-inline">
-                                                  <input type="hidden" name="PubPrimaryValue" value="@row["GroupName"]" />
+                                                    <input type="hidden" name="PubPrimaryValue" value="@row["GroupName"]" />
 
                                                     <button type="submit" class="btn btn-link p-0 text-primary fw-semibold">
                                                         <i class="bi bi-check2-circle"></i> Select

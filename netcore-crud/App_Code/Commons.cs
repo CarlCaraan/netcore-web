@@ -90,6 +90,9 @@ namespace netcore_crud.App_Code
             // Kapag may primary value, kunin din ang buong selected record.
             if (!string.IsNullOrWhiteSpace(PubPrimaryValue))
             {
+                common.Mode = "EDIT";
+                common.OriginalPubPrimary = PubPrimaryValue;
+
                 string sqlRecord = $"SELECT * FROM {TableName} WHERE {PubPrimary} = @PubPrimary";
 
                 using SqlCommand cmd = new SqlCommand(sqlRecord, myconn);
@@ -99,7 +102,6 @@ namespace netcore_crud.App_Code
 
                 using SqlDataReader dr = cmd.ExecuteReader();
 
-                // I-map ang database columns sa kaparehong property names ng model.
                 if (dr.Read())
                 {
                     foreach (PropertyInfo prop in typeof(T).GetProperties())
@@ -113,11 +115,6 @@ namespace netcore_crud.App_Code
 
                         prop.SetValue(model, value);
                     }
-
-                    // Ang selected record ay puwede nang i-edit sa view.
-                    common.Mode = "EDIT";
-                    // Itago ang original identifier para ma-validate ito sa pag-save.
-                    common.OriginalPubPrimary = PubPrimaryValue;
                 }
             }
 
@@ -127,6 +124,8 @@ namespace netcore_crud.App_Code
                 Record = model
             };
         }
+
+
 
         // Tinitingnan kung may matching column bago mag-set ng model property.
         private static bool HasColumn(SqlDataReader reader, string columnName)
@@ -139,7 +138,6 @@ namespace netcore_crud.App_Code
 
             return false;
         }
-
 
 
 

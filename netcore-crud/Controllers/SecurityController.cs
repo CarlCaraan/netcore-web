@@ -161,9 +161,14 @@ namespace netcore_crud.Controllers
                 //    model.Record.GroupName,
                 //    model.Common.MenuChoice);
 
+
                 // I-reload ang saved data bago magpakita ng success message.
                 var viewModel = BuildModel(model.Record.GroupName);
                 viewModel.Common.Message = Commons.ShowMessage("success", "Record saved successfully.");
+
+                ModelState.Remove("Common.Mode");
+                ModelState.Remove("Common.OriginalPubPrimary");
+
 
                 return View("Index", viewModel);
             }
