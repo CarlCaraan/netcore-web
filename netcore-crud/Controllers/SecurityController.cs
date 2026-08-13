@@ -214,6 +214,38 @@ namespace netcore_crud.Controllers
         }
 
 
+        [HttpPost("delete")]
+        // I-delete ang selected group at ang mga related detail records.
+        public IActionResult Delete(ModuleViewModel<SecurityModel> model)
+        {
+            try
+            {
+                // DeleteModule ang may database transaction para sa main record at related detail records.
+                Commons.DeleteModule(
+                    _configuration,
+                    PubTableName,
+                    PubPrimary,
+                    model.Record,
+                    ("UserAuthority", PubPrimary, model.Record),
+                    ("MenuChoice", PubPrimary, model.Record));
+
+
+                // I-reload ang data pagkatapos ma-delete bago magpakita ng success message.
+                var viewModel = BuildModel(null);
+                viewModel.Common.Message = Commons.ShowMessage("success", "Record deleted successfully.");
+
+                ModelState.Clear();
+
+                return View("Index", viewModel);
+            }
+            catch (Exception ex)
+            {
+                // Ibalik ang form kasama ang validation o database error.
+                model.Common.Message = Commons.ShowMessage("danger", ex.Message);
+
+                return View("Index", model);
+            }
+        }
 
 
 

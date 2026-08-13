@@ -37,6 +37,7 @@ namespace netcore_crud.Models.Shared
         public DataTable ViewList { get; set; } = new();
         // Default na editable ang fields kapag unang binuksan ang module.
         public bool IsReadOnly { get; set; } = false;
+        public bool IsDisable { get; set; } = true;
 
         // SECURITY MODUULE DETAIL TABLES
         public List<UserAuthorityModel> UserAuthority { get; set; } = new();

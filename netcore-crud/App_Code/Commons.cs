@@ -91,6 +91,7 @@ namespace netcore_crud.App_Code
             if (!string.IsNullOrWhiteSpace(PubPrimaryValue))
             {
                 common.Mode = "EDIT";
+                common.IsDisable = false;
                 common.OriginalPubPrimary = PubPrimaryValue;
 
                 string sqlRecord = $"SELECT * FROM {TableName} WHERE {PubPrimary} = @PubPrimary";
@@ -495,6 +496,91 @@ namespace netcore_crud.App_Code
         }
 
 
+        public static void DeleteModule<T>(
+            IConfiguration configuration,
+            string tableName,
+            string pubPrimary,
+            T model,
+            params (string TableName, string PubPrimary, object Model)[] detailModels)
+        {
+            using SqlConnection myconn = new SqlConnection(configuration.GetConnectionString("NetCoreConnection"));
+            myconn.Open();
+
+            using SqlTransaction tran = myconn.BeginTransaction();
+
+            try
+            {
+                // Delete all related detail records first.
+                foreach (var detail in detailModels)
+                {
+                    DeleteModuleDetail(
+                        myconn,
+                        tran,
+                        detail.TableName,
+                        detail.PubPrimary,
+                        detail.Model);
+                }
+
+                // Kunin ang primary value mula sa main model.
+                var primaryProperty = typeof(T).GetProperty(pubPrimary);
+
+                if (primaryProperty == null)
+                    throw new Exception($"{pubPrimary} property was not found in {typeof(T).Name}.");
+
+                var primaryValue = primaryProperty.GetValue(model);
+
+                if (primaryValue == null || string.IsNullOrWhiteSpace(primaryValue.ToString()))
+                    throw new Exception($"{pubPrimary} is required.");
+
+                // Delete main record.
+                string sql = $"DELETE FROM {tableName} WHERE {pubPrimary}=@PrimaryValue";
+
+                int affectedRows = myconn.Execute(
+                    sql,
+                    new { PrimaryValue = primaryValue },
+                    tran);
+
+                if (affectedRows == 0)
+                    throw new Exception($"Record with {pubPrimary} '{primaryValue}' was not found.");
+
+                tran.Commit();
+            }
+            catch
+            {
+                tran.Rollback();
+                throw;
+            }
+        }
+
+        private static void DeleteModuleDetail(
+            SqlConnection myconn,
+            SqlTransaction tran,
+            string tableName,
+            string pubPrimary,
+            object detailModel)
+        {
+            if (detailModel == null)
+                return;
+
+            // Kunin ang primary value mula sa detail model.
+            var primaryProperty = detailModel.GetType().GetProperty(pubPrimary);
+
+            if (primaryProperty == null)
+                throw new Exception($"{pubPrimary} property was not found in {detailModel.GetType().Name}.");
+
+            var primaryValue = primaryProperty.GetValue(detailModel);
+
+            if (primaryValue == null || string.IsNullOrWhiteSpace(primaryValue.ToString()))
+                return;
+
+            // Delete detail record.
+            string sql = $"DELETE FROM {tableName} WHERE {pubPrimary}=@PrimaryValue";
+
+            myconn.Execute(
+                sql,
+                new { PrimaryValue = primaryValue },
+                tran);
+        }
 
 
 
