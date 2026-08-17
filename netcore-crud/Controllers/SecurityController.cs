@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Dapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Data.SqlClient;
 using netcore_crud.App_Code;
@@ -247,6 +248,22 @@ namespace netcore_crud.Controllers
             }
         }
 
+        [HttpPost("searchmodule")]
+        // Maghanap ng pinakamalapit na record gamit ang mga field na may laman sa model.
+        public IActionResult SearchModule(ModuleViewModel<SecurityModel> model)
+        {
+            // Gamitin ang reusable SearchModule mula sa Commons para hanapin ang matching record.
+            // Ibabalik nito ang value ng primary key ng nahanap na record.
+            string? pubPrimaryValue = Commons.SearchModule(
+                _configuration,
+                PubTableName,
+                PubPrimary,
+                model.Record);
+
+            // I-redirect sa Index gamit ang nahanap na primary key.
+            // Si Index/BuildModel na ang bahalang mag-load ng buong record at related details.
+            return RedirectToAction(nameof(Index), new { PubPrimaryValue = pubPrimaryValue });
+        }
 
 
 

@@ -67,7 +67,7 @@ namespace netcore_crud.App_Code
             }
             else
             {
-                sql = $@"  SELECT TOP 30 * FROM {TableName} WHERE {PubPrimary} LIKE @Search OR Description LIKE @Search ORDER BY RowStamp DESC";
+                sql = $@"  SELECT TOP 30 * FROM {TableName} WHERE {PubPrimary} LIKE @Search ORDER BY RowStamp DESC";
             }
 
             // SqlDataAdapter ang nagfi-fill ng listahan sa DataTable para sa view.
@@ -581,6 +581,61 @@ namespace netcore_crud.App_Code
                 new { PrimaryValue = primaryValue },
                 tran);
         }
+
+
+
+        public static string? SearchModule<T>(
+            IConfiguration configuration,
+            string tableName,
+            string pubPrimary,
+            T model)
+        {
+            using var myconn = new SqlConnection(
+                configuration.GetConnectionString("NetCoreConnection"));
+
+            // Kunin ang lahat ng string properties ng model na may laman.
+            // Ang mga field na may value ang gagamitin bilang search criteria.
+            var properties = typeof(T).GetProperties()
+                .Where(x =>
+                    x.PropertyType == typeof(string) &&
+                    !string.IsNullOrWhiteSpace(x.GetValue(model)?.ToString()))
+                .ToDictionary(
+                    x => x.Name,
+                    x => x.GetValue(model)?.ToString()?.Trim() ?? "");
+
+            // Kapag walang kahit isang search field na may laman,
+            // walang record na hahanapin.
+            if (!properties.Any())
+                return null;
+
+            // Gumawa ng DynamicParameters para ligtas na maipasa
+            // ang dynamic search values bilang SQL parameters.
+            var parameters = new DynamicParameters();
+
+            // Idagdag sa Dapper parameters ang bawat property at value ng model.
+            foreach (var property in properties)
+                parameters.Add(property.Key, property.Value);
+
+            // Bumuo ng dynamic WHERE condition para sa lahat ng fields na may laman.
+            // LIKE '%value%' ang ginagamit para magkaroon ng soft/partial search.
+            // Kapag maraming fields ang may laman, lahat ng conditions ay kailangang tumugma.
+            string xWhere = string.Join(
+                " AND ",
+                properties.Keys.Select(x => $"({x} LIKE '%' + @{x} + '%')"));
+
+            // Kunin ang unang matching primary key mula sa table.
+            // ORDER BY primary key ang ginagamit bilang default order ng result.
+            string xQuery =
+                $"SELECT TOP 1 {pubPrimary} FROM {tableName} WHERE {xWhere} ORDER BY {pubPrimary}";
+
+            // I-execute ang dynamic query gamit ang Dapper.
+            // Ibabalik ang primary key ng unang matching record.
+            return myconn.QueryFirstOrDefault<string>(xQuery, parameters);
+        }
+
+
+
+
 
 
 

@@ -19,15 +19,15 @@
             <button class="btn btn-sm btn-toolbar"><i class="bi bi-plus-lg"></i> New</button>
         </form>
         <button form="formSave" class="btn btn-sm btn-toolbar"><i class="bi bi-floppy"></i> Save</button>
-<form id="formDelete" asp-controller="Security" asp-action="Delete" method="post">
-    <input type="hidden" name="Record.GroupName" value="@Model.Record.GroupName" />
+        <form id="formDelete" asp-controller="Security" asp-action="Delete" method="post">
+            <input type="hidden" name="Record.GroupName" value="@Model.Record.GroupName" />
 
-    <button type="button" class="btn btn-sm btn-toolbar" onclick="confirmDelete()" disabled="@Model.Common.IsDisable">
-        <i class="bi bi-trash"></i> Delete
-    </button>
-</form>
+            <button type="button" class="btn btn-sm btn-toolbar" onclick="confirmDelete()" disabled="@Model.Common.IsDisable">
+                <i class="bi bi-trash"></i> Delete
+            </button>
+        </form>
         <a asp-action="Index" asp-route-PubPrimaryValue="" class="btn btn-sm btn-toolbar"> <i class="bi bi-file-earmark"></i>Clear</a>
-        <button class="btn btn-sm btn-toolbar"><i class="bi bi-search"></i> Search</button>
+        <button type="submit" form="formSave" formaction="@Url.Action("SearchModule")" class="btn btn-sm btn-toolbar"><i class="bi bi-search"></i> Search </button>
         <button class="btn btn-sm btn-toolbar" data-bs-toggle="modal" data-bs-target="#ViewListModal"><i class="bi bi-list-ul"></i> List</button>
     </div>
 
