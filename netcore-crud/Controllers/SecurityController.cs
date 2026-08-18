@@ -154,12 +154,12 @@ namespace netcore_crud.Controllers
                     model.Common.Mode,
                     model.Common.UserAuthority);
 
-
-                //Commons.InsertModuleDetail<MenuChoiceModel>(
+                //Commons.SaveModuleDetail(
                 //    _configuration,
                 //    "MenuChoice",
                 //    "GroupName",
                 //    model.Record.GroupName,
+                //    model.Common.Mode,
                 //    model.Common.MenuChoice);
 
 
