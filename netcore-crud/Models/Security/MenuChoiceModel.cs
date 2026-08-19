@@ -5,5 +5,6 @@ namespace netcore_crud.Models.Security
         public string? Application { get; set; }
         public string? Menu { get; set; }
         public bool Access { get; set; }
+        public bool Active { get; set; }
     }
 }

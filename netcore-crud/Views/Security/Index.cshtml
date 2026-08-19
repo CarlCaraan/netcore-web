@@ -146,13 +146,21 @@
                                 <tbody>
                                     @if (Model.Common.MenuChoice != null && Model.Common.MenuChoice.Any())
                                     {
-                                        foreach (var item in Model.Common.MenuChoice)
+                                        for (int i = 0; i < Model.Common.MenuChoice.Count; i++)
                                         {
                                             <tr>
-                                                <td>@item.Application</td>
-                                                <td>@item.Menu</td>
+                                                <td>
+                                                    @Model.Common.MenuChoice[i].Application
+                                                    <input type="hidden" asp-for="Common.MenuChoice[i].Application" />
+                                                </td>
+
+                                                <td>
+                                                    @Model.Common.MenuChoice[i].Menu
+                                                    <input type="hidden" asp-for="Common.MenuChoice[i].Menu" />
+                                                </td>
+
                                                 <td class="text-center">
-                                                    <input class="form-check-input" type="checkbox" checked="@item.Access" />
+                                                    <input type="checkbox" asp-for="Common.MenuChoice[i].Access" class="form-check-input" />
                                                 </td>
                                             </tr>
                                         }

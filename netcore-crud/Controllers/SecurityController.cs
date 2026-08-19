@@ -154,13 +154,13 @@ namespace netcore_crud.Controllers
                     model.Common.Mode,
                     model.Common.UserAuthority);
 
-                //Commons.SaveModuleDetail(
-                //    _configuration,
-                //    "MenuChoice",
-                //    "GroupName",
-                //    model.Record.GroupName,
-                //    model.Common.Mode,
-                //    model.Common.MenuChoice);
+                Commons.SaveModuleDetail(
+                    _configuration,
+                    "MenuChoice",
+                    "GroupName",
+                    model.Record.GroupName,
+                    model.Common.Mode,
+                    model.Common.MenuChoice);
 
 
                 // I-reload ang saved data bago magpakita ng success message.

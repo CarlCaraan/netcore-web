@@ -496,13 +496,13 @@ namespace netcore_crud.App_Code
         //}
 
 
-        public static void SaveModuleDetail(
+        public static void SaveModuleDetail<T>(
             IConfiguration configuration,
             string tableName,
             string foreignKeyColumn,
             object foreignKeyValue,
             string mode,
-            List<UserAuthorityModel>? details = null)
+            List<T>? details = null)
         {
             using SqlConnection myconn = new(configuration.GetConnectionString("NetCoreConnection"));
             myconn.Open();
@@ -511,39 +511,85 @@ namespace netcore_crud.App_Code
 
             try
             {
-                if (mode.Equals("NEW", StringComparison.OrdinalIgnoreCase))
+                switch (tableName)
                 {
-                    string query = $"INSERT INTO [{tableName}] ([Reads], [Inserts], [Edits], [Deletes], [{foreignKeyColumn}], [Application], [Active]) SELECT 1, 1, 1, 1, @ForeignKeyValue, [Application], 1 FROM [{tableName}] WHERE [{foreignKeyColumn}] = 'ADMINISTRATOR'";
-
-                    myconn.Execute(query, new { ForeignKeyValue = foreignKeyValue }, transaction);
-                }
-                else if (mode.Equals("EDIT", StringComparison.OrdinalIgnoreCase))
-                {
-                    string deleteQuery = $"DELETE FROM [{tableName}] WHERE [{foreignKeyColumn}] = @ForeignKeyValue";
-
-                    myconn.Execute(deleteQuery, new { ForeignKeyValue = foreignKeyValue }, transaction);
-
-                    if (details != null && details.Count > 0)
-                    {
-                        string insertQuery = $"INSERT INTO [{tableName}] ([Reads], [Inserts], [Edits], [Deletes], [{foreignKeyColumn}], [Application], [Active]) VALUES (@Reads, @Inserts, @Edits, @Deletes, @ForeignKeyValue, @Application, @Active)";
-
-                        foreach (UserAuthorityModel item in details)
+                    case "UserAuthority":
+                        if (mode.Equals("NEW", StringComparison.OrdinalIgnoreCase))
                         {
-                            myconn.Execute(
-                                insertQuery,
-                                new
-                                {
-                                    item.Reads,
-                                    item.Inserts,
-                                    item.Edits,
-                                    item.Deletes,
-                                    ForeignKeyValue = foreignKeyValue,
-                                    Application = item.Application ?? "",
-                                    item.Active
-                                },
-                                transaction);
+                            string query = $"INSERT INTO [{tableName}] ([Reads], [Inserts], [Edits], [Deletes], [{foreignKeyColumn}], [Application], [Active]) SELECT 1, 1, 1, 1, @ForeignKeyValue, [Application], 1 FROM [{tableName}] WHERE [{foreignKeyColumn}] = 'ADMINISTRATOR'";
+
+                            myconn.Execute(query, new { ForeignKeyValue = foreignKeyValue }, transaction);
                         }
-                    }
+                        else if (mode.Equals("EDIT", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string deleteQuery = $"DELETE FROM [{tableName}] WHERE [{foreignKeyColumn}] = @ForeignKeyValue";
+
+                            myconn.Execute(deleteQuery, new { ForeignKeyValue = foreignKeyValue }, transaction);
+
+                            if (details != null && details.Count > 0)
+                            {
+                                string insertQuery = $"INSERT INTO [{tableName}] ([Reads], [Inserts], [Edits], [Deletes], [{foreignKeyColumn}], [Application], [Active]) VALUES (@Reads, @Inserts, @Edits, @Deletes, @ForeignKeyValue, @Application, @Active)";
+
+                                foreach (T detail in details)
+                                {
+                                    UserAuthorityModel item = (UserAuthorityModel)(object)detail;
+
+                                    myconn.Execute(
+                                        insertQuery,
+                                        new
+                                        {
+                                            item.Reads,
+                                            item.Inserts,
+                                            item.Edits,
+                                            item.Deletes,
+                                            ForeignKeyValue = foreignKeyValue,
+                                            Application = item.Application ?? "",
+                                            item.Active
+                                        },
+                                        transaction);
+                                }
+                            }
+                        }
+                        break;
+
+                    case "MenuChoice":
+                        if (mode.Equals("NEW", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string query = $"INSERT INTO [{tableName}] ([{foreignKeyColumn}], [Application], [Menu], [Access], [Active]) SELECT @ForeignKeyValue, [Application], [Menu], [Access], 1 FROM [{tableName}] WHERE [{foreignKeyColumn}] = 'ADMINISTRATOR'";
+
+                            myconn.Execute(query, new { ForeignKeyValue = foreignKeyValue }, transaction);
+                        }
+                        else if (mode.Equals("EDIT", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string deleteQuery = $"DELETE FROM [{tableName}] WHERE [{foreignKeyColumn}] = @ForeignKeyValue";
+
+                            myconn.Execute(deleteQuery, new { ForeignKeyValue = foreignKeyValue }, transaction);
+
+                            if (details != null && details.Count > 0)
+                            {
+                                string insertQuery = $"INSERT INTO [{tableName}] ([{foreignKeyColumn}], [Application], [Menu], [Access]) VALUES (@ForeignKeyValue, @Application, @Menu, @Access)";
+
+                                foreach (T detail in details)
+                                {
+                                    MenuChoiceModel item = (MenuChoiceModel)(object)detail;
+
+                                    myconn.Execute(
+                                        insertQuery,
+                                        new
+                                        {
+                                            ForeignKeyValue = foreignKeyValue,
+                                            Application = item.Application ?? "",
+                                            Menu = item.Menu ?? "",
+                                            item.Access
+                                        },
+                                        transaction);
+                                }
+                            }
+                        }
+                        break;
+
+                    default:
+                        throw new ArgumentException($"Unsupported detail table: {tableName}");
                 }
 
                 transaction.Commit();
