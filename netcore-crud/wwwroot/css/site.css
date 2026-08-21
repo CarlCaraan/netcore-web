@@ -1,20 +1,17 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 /* Login Page Only */
@@ -95,28 +92,28 @@ body.login-page {
     margin-top: 0;
 }
 .navbar-brand {
-    font-weight:700;
+    font-weight: 700;
     font-size: 20px;
 }
 .navbar {
     background: linear-gradient(90deg, #0f172a 0%, #1e3a8a 45%, #2563eb 100%) !important;
 }
-.navbar .navbar-brand,
-.navbar .nav-link,
-.navbar .dropdown-toggle,
-.navbar .navbar-text {
-    color: #fff !important;
-}
-
-    .navbar .nav-link:hover,
-    .navbar .dropdown-toggle:hover,
-    .navbar .navbar-brand:hover {
-        color: #f8f9fa !important;
+    .navbar .navbar-brand,
+    .navbar .nav-link,
+    .navbar .dropdown-toggle,
+    .navbar .navbar-text {
+        color: #fff !important;
     }
 
-.navbar .dropdown-menu .dropdown-item {
-    color: #212529 !important;
-}
+        .navbar .nav-link:hover,
+        .navbar .dropdown-toggle:hover,
+        .navbar .navbar-brand:hover {
+            color: #f8f9fa !important;
+        }
+
+    .navbar .dropdown-menu .dropdown-item {
+        color: #212529 !important;
+    }
 
 /* ===========================
 /* ========= Secondary Navbar =========
@@ -132,7 +129,7 @@ body.login-page {
     border-radius: 3px;
     margin-bottom: 15px;
     margin-top: 2px;
-    margin-inline:4px;
+    margin-inline: 4px;
 }
 
 .module-title {
