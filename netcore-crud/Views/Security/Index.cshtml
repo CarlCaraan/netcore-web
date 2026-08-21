@@ -65,7 +65,7 @@
                     </div>
 
                     <div class="col-md-5">
-                        <button class="btn btn-sm btn-primary"> Manage Users</button>
+                        <button class="btn btn-sm btn-primary" disabled="@Model.Common.IsDisable"> Manage Users</button>
                         <button class="btn btn-sm btn-primary"> Export Users</button>
                     </div>
 
@@ -75,6 +75,7 @@
 
                 @* START DETAIL TABLE *@
                 <div class="row mt-2">
+                    @* User Authority *@
                     <div class="col-md-4">
                         <h6 class="text-primary">User Authority</h6>
                         <div class="table-responsive border rounded detail-table-container">
@@ -132,6 +133,8 @@
                             </table>
                         </div>
                     </div>
+
+                    @* Menu Choice *@
                     <div class="col-md-4">
                         <h6 class="text-primary">Menu Choice</h6>
                         <div class="table-responsive border rounded detail-table-container">
@@ -177,6 +180,53 @@
                             </table>
                         </div>
                     </div>
+
+                    @* LoginNames *@
+                    <div class="col-md-4">
+                        <h6 class="text-primary">Login Names</h6>
+                        <div class="table-responsive border rounded detail-table-container">
+                            <table class="table table-bordered table-hover table-sm align-middle detail-table">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width:35%;">Username</th>
+                                        <th>On Hold</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.Common.LoginNames != null && Model.Common.LoginNames.Any())
+                                    {
+                                        for (int i = 0; i < Model.Common.LoginNames.Count; i++)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @Model.Common.LoginNames[i].Username
+                                                </td>
+
+                                                <td class="text-center">
+                                                    <input type="checkbox" asp-for="Common.LoginNames[i].Hold" class="form-check-input" />
+                                                </td>
+
+                                                <td>
+                                                    <button class="btn btn-sm btn-secondary">Change Group</button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="3" class="text-center text-muted">
+                                                No records found.
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+
                     <div class="col-md-4"></div>
 
                 </div>

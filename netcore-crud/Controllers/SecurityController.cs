@@ -93,6 +93,12 @@ namespace netcore_crud.Controllers
                     "GroupName",
                     model.Record.GroupName);
 
+                model.Common.LoginNames = Commons.LoadModuleDetail<LoginNamesModel>(
+                    _configuration,
+                    "LoginNames",
+                    "GroupName",
+                    model.Record.GroupName);
+
             }
 
             return model;

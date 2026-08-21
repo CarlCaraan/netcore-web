@@ -42,5 +42,6 @@ namespace netcore_crud.Models.Shared
         // SECURITY MODUULE DETAIL TABLES
         public List<UserAuthorityModel> UserAuthority { get; set; } = new();
         public List<MenuChoiceModel> MenuChoice { get; set; } = new();
+        public List<LoginNamesModel> LoginNames { get; set; } = new();
     }
 }
