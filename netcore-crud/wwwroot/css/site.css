@@ -14,6 +14,12 @@ html {
     box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
+.validation-error {
+    font-size: 11px;
+    line-height: 1;
+    padding:0;
+}
+
 /* Login Page Only */
 body.login-page {
     background: linear-gradient(135deg, #0d6efd 0%, #4f46e5 100%);

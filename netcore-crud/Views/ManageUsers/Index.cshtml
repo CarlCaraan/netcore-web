@@ -1,0 +1,242 @@
+﻿@using Microsoft.AspNetCore.Http
+@model ModuleViewModel<LoginNamesModel>
+
+@{
+    ViewData["Title"] = "Manage Users";
+    var groupName = Context.Session.GetString("ManageUsersGroupName");
+}
+
+<div class="module-header mb-3">
+    <div class="module-title">
+        <i class="bi bi-people-fill"></i>
+        @groupName
+        <span class="module-status">
+            &gt;&gt; Manage Users
+        </span>
+    </div>
+
+    <div class="module-toolbar">
+    </div>
+</div>
+
+<div class="container-fluid px-0">
+
+    <!-- Password Requirement -->
+    <div class="alert alert-info py-2 mb-3">
+        <strong>Password Requirements:</strong>
+        At least 1 capital letter, 1 small letter, 1 number and 1 special character.
+        Minimum length is 7.
+    </div>
+
+    <!-- Message Alert -->
+    @Model.Common.Message
+
+    <!-- User Form -->
+<form asp-action="Save"
+      asp-route-groupName="@Context.Session.GetString("ManageUsersGroupName")"
+      method="post">
+
+    @Html.AntiForgeryToken()
+
+    <div class="row mb-4">
+
+        <div class="col-md-7 col-lg-6">
+
+            <div class="row mb-2 align-items-center">
+                <label asp-for="Record.Username"
+                       class="col-sm-4 col-form-label fw-semibold text-sm-end">
+                    User Name
+                </label>
+
+                <div class="col-sm-8">
+                    <input asp-for="Record.Username"
+                           class="form-control"
+                           placeholder="Enter username" />
+
+                    <span asp-validation-for="Record.Username"
+                           class="text-danger validation-error d-block"></span>
+                </div>
+            </div>
+
+            <div class="row mb-2 align-items-center">
+                <label asp-for="Record.Password"
+                       class="col-sm-4 col-form-label fw-semibold text-sm-end">
+                    Password
+                </label>
+
+                <div class="col-sm-8">
+                    <div class="input-group">
+                        <input asp-for="Record.Password"
+                               type="password"
+                               id="password"
+                               class="form-control"
+                               placeholder="Enter password" />
+
+                        <button type="button"
+                                class="btn btn-outline-secondary"
+                                id="togglePassword">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+
+                    <span asp-validation-for="Record.Password"
+                          class="text-danger validation-error d-block"></span>
+                </div>
+            </div>
+
+            <div class="row mb-2 align-items-center">
+                <label class="col-sm-4 col-form-label fw-semibold text-sm-end">
+                    Retype Password
+                </label>
+
+                <div class="col-sm-8">
+                    <input type="password"
+                           id="retypePassword"
+                           class="form-control"
+                           placeholder="Retype password" />
+
+                    <span id="passwordError"
+                           class="text-danger validation-error d-block"></span>
+                </div>
+            </div>
+
+            <div class="row mb-3 align-items-center">
+                <label asp-for="Record.Email"
+                       class="col-sm-4 col-form-label fw-semibold text-sm-end">
+                    Email Address
+                </label>
+
+                <div class="col-sm-8">
+                    <input asp-for="Record.Email"
+                           type="email"
+                           class="form-control"
+                           placeholder="Enter email address" />
+
+                    <span asp-validation-for="Record.Email"
+                          class="text-danger validation-error d-block"></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="offset-sm-4 col-sm-8">
+
+                    <a href="/sys-security/ManageUsers/@Context.Session.GetString("ManageUsersGroupName")" class="btn btn-outline-secondary me-1"><i class="bi bi-x-circle"></i> Clear</a>
+
+                    <button type="submit"
+                            class="btn btn-primary"
+                            id="btnSave">
+                        <i class="bi bi-save"></i>
+                        Save
+                    </button>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</form>
+
+ <!-- Users Table -->
+<div class="table-responsive">
+
+    <table class="table table-bordered table-hover align-middle">
+
+        <thead class="table-light">
+            <tr>
+                <th style="width: 90px;"></th>
+                <th>User Name</th>
+                <th style="width: 100px;">Hold</th>
+                <th>Email Address</th>
+                <th>Created By</th>
+                <th>Created Date</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            @if (Model.Common.LoginNames != null && Model.Common.LoginNames.Any())
+            {
+                foreach (var item in Model.Common.LoginNames)
+                {
+                    <tr>
+                        <td>
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger"
+                                    title="Delete" onclick="confirmDelete()">
+                                <i class="bi bi-trash"></i>
+                            </button>
+
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-primary"
+                                    title="Edit">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                        </td>
+
+                        <td>@item.Username</td>
+
+                        <td class="text-center">
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   @(item.Hold ? "checked" : "")
+                                   disabled />
+                        </td>
+
+                        <td>@item.Email</td>
+
+                        <td>@item.Createdby</td>
+
+                        <td>@item.Createddate?.ToString("MM/dd/yyyy")</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-3">
+                        No users found for this group.
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+
+</div>
+
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('togglePassword')?.addEventListener('click', function () {
+            const password = document.getElementById('password');
+            const icon = this.querySelector('i');
+
+            if (password.type === 'password') {
+                password.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                password.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        });
+        
+         document.getElementById("btnSave").addEventListener("click", function (e) {
+            const password = document.getElementById("password").value;
+            const retypePassword = document.getElementById("retypePassword").value;
+            const passwordError = document.getElementById("passwordError");
+
+            passwordError.textContent = "";
+
+            if (password !== retypePassword) {
+                e.preventDefault();
+                passwordError.textContent = "Passwords do not match.";
+            }
+        });
+    </script>
+}

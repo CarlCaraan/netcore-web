@@ -7,6 +7,7 @@ using netcore_crud.Models.Security;
 using netcore_crud.Models.Shared;
 using System.Data;
 using System.Security.AccessControl;
+using FluentValidation;
 
 namespace netcore_crud.Controllers
 {
@@ -24,11 +25,12 @@ namespace netcore_crud.Controllers
         string PubThird = "CanChangePW";
 
         private readonly IConfiguration _configuration;
+        private readonly IValidator<SecurityModel> _validator;
 
-        public SecurityController(IConfiguration configuration)
+        public SecurityController(IConfiguration configuration, IValidator<SecurityModel> validator)
         {
-            // Database configuration na ipapasa sa shared module helpers.
             _configuration = configuration;
+            _validator = validator;
         }
 
 
@@ -139,8 +141,21 @@ namespace netcore_crud.Controllers
 
         [HttpPost("save")]
         // I-save ang bagong group o update sa existing group.
-        public IActionResult Save(ModuleViewModel<SecurityModel> model)
+        public async Task<IActionResult> Save(ModuleViewModel<SecurityModel> model)
         {
+            //FluentValidator
+            var validationResult = await _validator.ValidateAsync(model.Record);
+            if (!validationResult.IsValid)
+            {
+                foreach (var error in validationResult.Errors)
+                {
+                    ModelState.AddModelError($"Record.{error.PropertyName}", error.ErrorMessage);
+                }
+
+                return View("Index", model);
+            }
+
+
             try
             {
                 // SaveModule ang may duplicate primary-value validation at database transaction.

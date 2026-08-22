@@ -49,6 +49,7 @@
                     <div class="col-md-6">
                         @* Readonly lang ang unique Group Name kapag existing record ang naka-select. *@
                         <input asp-for="Record.GroupName" placeholder="Group Name" class="form-control form-control-sm" readonly="@Model.Common.IsEdit" />
+                        <span asp-validation-for="Record.GroupName" class="text-danger validation-error d-block"></span>
                     </div>
                     <div class="col-md-5">
                         <input class="form-check-input" asp-for="Record.CanChangePW" type="checkbox" id="CanChangePassword" />
@@ -62,10 +63,18 @@
                     <label class="col-md-1 form-label small fw-semibold mb-1">Description</label>
                     <div class="col-md-6">
                         <input asp-for="Record.Description" placeholder="Group Description" class="form-control form-control-sm" />
+                        <span asp-validation-for="Record.Description" class="text-danger validation-error d-block"></span>
                     </div>
 
                     <div class="col-md-5">
-                        <button class="btn btn-sm btn-primary" disabled="@Model.Common.IsDisable"> Manage Users</button>
+                        @if (!Model.Common.IsDisable)
+                        {
+                            <a asp-controller="ManageUsers" asp-action="Index" asp-route-groupName="@Model.Record.GroupName" target="_blank" class="btn btn-sm btn-primary">Manage Users</a>
+                        }
+                        else
+                        {
+                            <button class="btn btn-sm btn-primary" disabled>Manage Users</button>
+                        }
                         <button class="btn btn-sm btn-primary"> Export Users</button>
                     </div>
 
