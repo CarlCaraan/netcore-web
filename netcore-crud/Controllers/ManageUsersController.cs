@@ -49,7 +49,7 @@ namespace netcore_crud.Controllers
         }
 
 
-        [HttpPost("sys-security/ManageUsers/{groupName}/Save")]
+        [HttpPost("sys-security/ManageUsers/{groupName}/save")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Save(string groupName, ModuleViewModel<LoginNamesModel> model)
         {
@@ -102,16 +102,43 @@ namespace netcore_crud.Controllers
             return View("Index", savedModel);
         }
 
+        [HttpGet("sys-security/ManageUsers/{groupName}/save")]
+        public IActionResult Save(string groupName)
+        {
+            return RedirectToAction("Index", "ManageUsers", new { groupName });
+        }
 
 
+        [HttpPost("sys-security/ManageUsers/{groupName}/delete")]
+        public IActionResult Delete(string username, string groupName)
+        {
+            try
+            {
+                using SqlConnection myconn = new SqlConnection(_configuration.GetConnectionString("NetCoreConnection"));
 
+                string query = "DELETE FROM LoginNames WHERE Username = @Username AND GroupName <> 'Administrator'";
 
+                myconn.Execute(query, new { Username = username });
 
+                var savedModel = BuildModel(groupName);
+                savedModel.Common.Message = Commons.ShowMessage("success", "User deleted successfully.");
 
+                return View("Index", savedModel);
+            }
+            catch (Exception ex)
+            {
+                var model = BuildModel(groupName);
+                model.Common.Message = Commons.ShowMessage("danger", ex.Message);
 
+                return View("Index", model);
+            }
+        }
 
-
-
+        [HttpGet("sys-security/ManageUsers/{groupName}/delete")]
+        public IActionResult Delete(string groupName)
+        {
+            return RedirectToAction("Index", "ManageUsers", new { groupName });
+        }
 
 
 

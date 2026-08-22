@@ -162,11 +162,14 @@
                 {
                     <tr>
                         <td>
-                            <button type="button"
-                                    class="btn btn-sm btn-outline-danger"
-                                    title="Delete" onclick="confirmDelete()">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                                <form asp-action="Delete" asp-route-groupName="@item.Groupname" method="post" class="d-inline" onsubmit="return confirmDelete(event, '@item.Username');">
+                                    <input type="hidden" name="username" value="@item.Username" />
+                                    <input type="hidden" name="groupName" value="@item.Groupname" />
+
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
 
                             <button type="button"
                                     class="btn btn-sm btn-outline-primary"
@@ -238,5 +241,33 @@
                 passwordError.textContent = "Passwords do not match.";
             }
         });
+
+
+
+
+                function confirmDelete(event, username) {
+            event.preventDefault();
+
+            const form = event.target;
+
+            Swal.fire({
+                title: 'Delete User?',
+                text: `Are you sure you want to delete "${username}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+
+            return false;
+        }
+
+
+
+
     </script>
 }
