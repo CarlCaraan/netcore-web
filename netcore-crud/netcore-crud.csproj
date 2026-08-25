@@ -7,6 +7,8 @@
     <RootNamespace>netcore_crud</RootNamespace>
   </PropertyGroup>
 
+
+
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.79" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />

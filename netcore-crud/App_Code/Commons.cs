@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using netcore_crud.Models.Security;
 using netcore_crud.Models.Shared;
 using System.Data;
 using System.Reflection;

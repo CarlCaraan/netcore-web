@@ -1,0 +1,204 @@
+﻿@{
+    ViewData["Title"] = "CardFile";
+}
+@model ModuleViewModel<CardFileModel>
+
+<div class="module-header">
+
+
+    <div class="module-title">
+        <i class="bi bi-shield-lock-fill"></i>
+        CARD FILE
+        <span class="module-status">
+            >>@Model.Common.Status
+        </span>
+    </div>
+
+    <div class="module-toolbar">
+        <form asp-action="New" method="post" class="d-inline">
+            <button class="btn btn-sm btn-toolbar"><i class="bi bi-plus-lg"></i> New</button>
+        </form>
+        <button form="formSave" class="btn btn-sm btn-toolbar"><i class="bi bi-floppy"></i> Save</button>
+        <form id="formDelete" asp-controller="CardFile" asp-action="Delete" method="post">
+            <input type="hidden" name="Record.Code" value="@Model.Record.Code" />
+
+            <button type="button" class="btn btn-sm btn-toolbar" onclick="confirmDelete()" disabled="@Model.Common.IsDisable">
+                <i class="bi bi-trash"></i> Delete
+            </button>
+        </form>
+        <a asp-action="Index" asp-route-PubPrimaryValue="" class="btn btn-sm btn-toolbar"> <i class="bi bi-file-earmark"></i>Clear</a>
+        <button type="submit" form="formSave" formaction="@Url.Action("SearchModule")" class="btn btn-sm btn-toolbar"><i class="bi bi-search"></i> Search </button>
+        <button class="btn btn-sm btn-toolbar" data-bs-toggle="modal" data-bs-target="#ViewListModal"><i class="bi bi-list-ul"></i> List</button>
+    </div>
+
+</div>
+
+<div class="container-fluid mt-3">
+    <!-- Message Alert -->
+    @Model.Common.Message
+    <div class="card">
+        <div class="card-body">
+
+            <form asp-action="Save" id="formSave" method="post" class="d-inline">
+                @* HIDDEN FIELD *@
+                <input asp-for="Common.Mode" type="hidden" />
+                @* Original OriginalPubPrimary para ma-block ang pag-edit ng unique identifier. *@
+                <input asp-for="Common.OriginalPubPrimary" type="hidden" />
+                <div class="row">
+                    <label class="col-md-1 form-label small fw-semibold mb-1">Code</label>
+                    <div class="col-md-6">
+                        @* Readonly lang ang unique Group Name kapag existing record ang naka-select. *@
+                        <input asp-for="Record.Code" placeholder="Code" class="form-control form-control-sm" readonly="@Model.Common.IsEdit" />
+                        <span asp-validation-for="Record.Code" class="text-danger validation-error d-block"></span>
+                    </div>
+                </div>
+
+
+
+        
+                @* START AUDIT TRAIL *@
+                <div class="row g-2 align-items-center mt-5 border-top">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold mb-1">Created By</label>
+                        <input asp-for="Record.CreatedBy" class="form-control form-control-sm" readonly="@Model.Common.IsAuditReadOnly" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold mb-1">Created Date</label>
+                        <input asp-for="Record.CreatedDate" class="form-control form-control-sm" readonly="@Model.Common.IsAuditReadOnly" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold mb-1">Modified By</label>
+                        <input asp-for="Record.ModifiedBy" class="form-control form-control-sm" readonly="@Model.Common.IsAuditReadOnly" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold mb-1">Modified Date</label>
+                        <input asp-for="Record.ModifiedDate" class="form-control form-control-sm" readonly="@Model.Common.IsAuditReadOnly" />
+                    </div>
+                </div>
+                @* END AUDIT TRAIL *@
+
+            </form>
+
+        </div>
+    </div>
+
+
+
+
+
+    @* VIEW LIST MODAL *@
+    <div class="modal fade" id="ViewListModal" tabindex="-1" aria-labelledby="ViewListModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content shadow">
+
+                <!-- Header -->
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title fw-bold text-primary" id="ViewListModalLabel">
+                        <i class="bi bi-search"></i> Search
+                        <small class="text-secondary fw-normal">» Results</small>
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body">
+
+                    <!-- Search -->
+                    <form asp-action="SearchViewList" method="post">
+                        <div class="row mb-3">
+
+                            <div class="col-md-5">
+                                <input asp-for="Common.txtSearch" type="text" class="form-control" placeholder="Search Here..." />
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-search"></i> Search
+                                </button>
+                            </div>
+
+         
+
+                            <div class="col-md-3">
+                                <button class="btn btn-primary w-100">
+                                    <i class="bi bi-list"></i> Display All Records
+                                </button>
+                            </div>
+
+                        </div>
+                    </form>
+
+                    <!-- START VIEW LIST GRID -->
+                    <div class="table-responsive border rounded" style="height:400px; overflow-y:auto;">
+                        <table class="table table-hover table-bordered table-sm mb-0 align-middle">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th class="text-center" style="width:90px;">Action</th>
+                                    <th>Code</th>
+                                    <th>Type</th>
+                                    <th class="text-center" style="width:140px;">Can Change PW</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @if (Model.Common.ViewList != null && Model.Common.ViewList.Rows.Count > 0)
+                                {
+                                    @foreach (System.Data.DataRow row in Model.Common.ViewList.Rows)
+                                    {
+                                        <tr>
+                                            <td class="text-center">
+                                                <form asp-action="Select" method="post" class="d-inline">
+                                                    <input type="hidden" name="PubPrimaryValue" value="@row["Code"]" />
+
+                                                    <button type="submit" class="btn btn-link p-0 text-primary fw-semibold">
+                                                        <i class="bi bi-check2-circle"></i> Select
+                                                    </button>
+                                                </form>
+                                            </td>
+                                            <td>@row["Code"]</td>
+                                            <td>@row["Type"]</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-4">
+                                            No records found.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- END VIEW LIST GRID -->
+
+
+
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer">
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+@* SHOW MODAL *@
+@if (ViewBag.ShowModal == true)
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var modal = new bootstrap.Modal(document.getElementById("ViewListModal"));
+            modal.show();
+        });
+    </script>
+}
+
+

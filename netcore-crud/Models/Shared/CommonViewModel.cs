@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Html;
 using netcore_crud.Models.Security;
+using netcore_crud.Models.CardFile;
 using System.Data;
 
 namespace netcore_crud.Models.Shared
