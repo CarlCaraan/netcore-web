@@ -9,10 +9,9 @@ namespace netcore_crud.Models.Security
         public string ModifiedBy { get; set; } = string.Empty;
         public DateTime ModifiedDate { get; set; }
 
-        [Required]
-        public string GroupName { get; set; } = string.Empty;
+        public string? GroupName { get; set; } = string.Empty;
 
-        public string Description { get; set; } = string.Empty;
+        public string? Description { get; set; } = string.Empty;
         public bool CanChangePW { get; set; }
     }
 }
