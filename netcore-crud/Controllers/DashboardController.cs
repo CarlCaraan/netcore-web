@@ -14,6 +14,10 @@ namespace netcore_crud.Controllers
         // Main dashboard ng normal user.
         public IActionResult Index()
         {
+            ViewBag.Message = HttpContext.Session.GetString("PermissionMessage");
+
+            HttpContext.Session.Remove("PermissionMessage");
+
             return View();
         }
 

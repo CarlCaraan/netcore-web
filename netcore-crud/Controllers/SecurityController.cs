@@ -8,6 +8,7 @@ using netcore_crud.Models.Shared;
 using System.Data;
 using System.Security.AccessControl;
 using FluentValidation;
+using netcore_crud.Authorization;
 
 namespace netcore_crud.Controllers
 {
@@ -16,7 +17,7 @@ namespace netcore_crud.Controllers
     [Route("sys-security")]
     public class SecurityController : BaseController
     {
-        public string ModuleName = "SECURITY";
+        public const string ModuleName = "SECURITY";
         public string ModuleAbbr = "SEC";
         // Configuration ng main table at mga fields na ginagamit ng module.
         string PubTableName = "GroupName";
@@ -106,6 +107,7 @@ namespace netcore_crud.Controllers
             return model;
         }
 
+        [Permission(ModuleName, "READ")]
         [HttpGet("{PubPrimaryValue?}")]
         // Ipakita ang module; optional ang group name para sa selected record.
         public IActionResult Index(string? PubPrimaryValue)
@@ -114,7 +116,7 @@ namespace netcore_crud.Controllers
         }
 
 
-
+        [Permission(ModuleName, "INSERT")]
         [HttpPost("new")]
         // Maghanda ng blank record na puwedeng i-save bilang bagong security group.
         public IActionResult New()
@@ -221,7 +223,7 @@ namespace netcore_crud.Controllers
             }
         }
 
-
+        [Permission(ModuleName, "EDIT")]
         [HttpPost("select")]
         // I-redirect sa selected group para ma-load ang complete record details.
         public IActionResult Select(String PubPrimaryValue)
@@ -253,7 +255,7 @@ namespace netcore_crud.Controllers
             return View("Index", viewModel);
         }
 
-
+        [Permission(ModuleName, "DELETE")]
         [HttpPost("delete")]
         // I-delete ang selected group at ang mga related detail records.
         public IActionResult Delete(ModuleViewModel<SecurityModel> model)
@@ -287,6 +289,7 @@ namespace netcore_crud.Controllers
             }
         }
 
+        [Permission(ModuleName, "EDIT")]
         [HttpPost("searchmodule")]
         // Maghanap ng pinakamalapit na record gamit ang mga field na may laman sa model.
         public IActionResult SearchModule(ModuleViewModel<SecurityModel> model)

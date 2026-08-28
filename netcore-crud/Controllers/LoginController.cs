@@ -75,7 +75,7 @@ namespace netcore_crud.Controllers
                         return RedirectToAction("LoginSuccess", "Dashboard");
                     }
 
-                    return RedirectToAction("Dashboard", "Dashboard");
+                    return RedirectToAction("Index", "Dashboard");
                 }
 
                 // Ipakita ang dahilan kung bakit hindi pinapayagang mag-login.

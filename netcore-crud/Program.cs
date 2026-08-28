@@ -1,4 +1,5 @@
 using FluentValidation;
+using netcore_crud.Authorization;
 using netcore_crud.Validators.Security;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +29,11 @@ app.UseStaticFiles();
 
 app.UseRouting();
 app.UseSession();
+
+app.UseMiddleware<PermissionMiddleware>();
+
+//app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllerRoute(
