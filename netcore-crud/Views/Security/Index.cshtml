@@ -96,7 +96,7 @@
                                         <th class="text-center">Insert</th>
                                         <th class="text-center">Edit</th>
                                         <th class="text-center">Delete</th>
-                                        <th class="text-center">Active</th>
+                                        @* <th class="text-center">Active</th> *@
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -126,9 +126,9 @@
                                                     <input type="checkbox" asp-for="Common.UserAuthority[i].Deletes" class="form-check-input" />
                                                 </td>
 
-                                                <td class="text-center">
+                                                @* <td class="text-center">
                                                     <input type="checkbox" asp-for="Common.UserAuthority[i].Active" class="form-check-input" />
-                                                </td>
+                                                </td> *@
                                             </tr>
                                         }
                                     }
