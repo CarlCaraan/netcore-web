@@ -39,15 +39,20 @@ namespace netcore_crud.Models.Shared
         public DataTable ViewList { get; set; } = new();
         // Default na editable ang fields kapag unang binuksan ang module.
         public bool IsReadOnly { get; set; } = false;
-        public bool IsDisable { get; set; } = true;
+        public bool IsDisable { get; set; } = false;
 
-        // SECURITY MODUULE DETAIL TABLES
+
+
+        //===============================================================================
+
+        // SECURITY MODULE 
         public List<UserAuthorityModel> UserAuthority { get; set; } = new();
         public List<MenuChoiceModel> MenuChoice { get; set; } = new();
         public List<LoginNamesModel> LoginNames { get; set; } = new();
 
-        // CARD FILE DROPDOWNS
+        // CARD FILE MODULE
         public List<SelectListItem> CardFileType { get; set; } = new();
         public List<SelectListItem> CardFileCategory { get; set; } = new();
+        public bool ShowCardTypeModal { get; set; } // Show Card Type Modal
     }
 }

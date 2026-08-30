@@ -10,7 +10,7 @@ using netcore_crud.Caching;
 using netcore_crud.Models.CardFile;
 using netcore_crud.Models.Shared;
 using System.Data;
-using System.Security.AccessControl;
+using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace netcore_crud.Controllers
 {
@@ -92,6 +92,56 @@ namespace netcore_crud.Controllers
 
             // Default values ng fields sa bagong group.
 
+            //if ()
+            //{
+            //    model.Record.Code = "AUTO GENERATED";
+            //}
+            //else
+            //{
+            //    txtCode.Text = "";
+            //    txtCode.ReadOnly = false;
+            //    txtCode.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+            //    ExecuteJS("showModalCurrency();");
+            //    //txtCode.Focus();
+            //}
+            ViewBag.ShowCardTypeModal = true;
+
+            return View("Index", model);
+        }
+
+        public IActionResult SelectCardType(string cardType)
+        {
+            var model = BuildModel(null);
+            if (cardType != null)
+            {
+                model.Common.Mode = "NEW";
+
+                // I-set ang current user at timestamps para sa bagong record.
+                model.Record.CreatedBy = HttpContext.Session.GetString("UserName") ?? string.Empty;
+                model.Record.CreatedDate = DateTime.Now;
+                model.Record.ModifiedBy = HttpContext.Session.GetString("UserName") ?? string.Empty;
+                model.Record.ModifiedDate = DateTime.Now;
+
+                model.Record.Code = "AUTO GENERATED";
+                model.Common.IsReadOnly = true;
+
+                model.Record.Type = cardType;
+                model.Common.IsDisable = true;
+
+                if (model.Record.Code == "AUTO GENERATED")
+                {
+                    using var myconn = new SqlConnection(_configuration.GetConnectionString("NetCoreConnection"));
+
+                    string xCodeAbbr = myconn.QueryFirstOrDefault<string>("SELECT CardFileTypeAbbr FROM CardFileTypeSetup WHERE CardFileType = @CardFileType", new { CardFileType = cardType }) ?? string.Empty;
+
+                    if (!string.IsNullOrEmpty(xCodeAbbr))
+                    {
+                        int nextCode = myconn.QueryFirstOrDefault<int>("SELECT ISNULL(MAX(CASE WHEN Code LIKE @Prefix THEN TRY_CONVERT(NUMERIC, REPLACE(Code, @ReplacePrefix, '')) END), 0) + 1 FROM CardFile WHERE Code LIKE @Prefix", new { Prefix = xCodeAbbr + "-%", ReplacePrefix = xCodeAbbr + "-" });
+
+                        model.Record.Code = $"{xCodeAbbr}-{nextCode:D5}";
+                    }
+                }
+            }
             return View("Index", model);
         }
 

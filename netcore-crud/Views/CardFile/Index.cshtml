@@ -50,7 +50,7 @@
                         <div class="mb-2 row">
                             <label class="col-md-2 col-form-label-sm text-end">Card File Code<span class="fw-bold text-danger"> *</span></label>
                             <div class="col-md-4">
-                                <input asp-for="Record.Code" placeholder="Card File" class="form-control form-control-sm" readonly="@Model.Common.IsEdit" />
+                                <input asp-for="Record.Code" placeholder="Card File" class="form-control form-control-sm" readonly="@(Model.Common.IsEdit || Model.Common.IsReadOnly)" />
                                 <span asp-validation-for="Record.Code" class="text-danger validation-error d-block"></span>
                             </div>
 
@@ -58,10 +58,13 @@
                             <div class="col-md-4">
                                 <select asp-for="Record.Type"
                                         asp-items="Model.Common.CardFileType"
-                                        class="form-select form-select-sm searchable-select">
+                                        class="form-select form-select-sm searchable-select" disabled="@(Model.Common.IsDisable || Model.Common.IsEdit)">
                                     <option value=""></option>
                                 </select>
-
+                                @if (Model.Common.IsDisable)
+                                {
+                                    <input type="hidden" asp-for="Record.Type" />
+                                }
                                 <span asp-validation-for="Record.Type"
                                       class="text-danger validation-error d-block"></span>
                             </div>
@@ -261,7 +264,41 @@
     </div>
 
 
+    @* VIEW CARD TYPE MODAL *@
+    <div class="modal fade" id="ViewCardTypeModal" tabindex="-1" aria-labelledby="ViewCardTypeLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content shadow">
 
+                <!-- Header -->
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title fw-bold text-primary" id="ViewCardTypeLabel">
+                        Please Select Card Type
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                    </button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body">
+                    <form asp-action="SelectCardType" method="post">
+                        <select asp-items="Model.Common.CardFileType" name="cardType"
+                                class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value=""> --Select-- </option>
+                        </select>
+                    </form>
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer">
+                </div>
+
+            </div>
+        </div>
+    </div>
 
 
     @* VIEW LIST MODAL *@
@@ -386,4 +423,15 @@
     </script>
 }
 
+@if (ViewBag.ShowCardTypeModal == true)
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var modalElement = document.getElementById("ViewCardTypeModal");
 
+            var modal = new bootstrap.Modal(modalElement);
+
+            modal.show();
+        });
+    </script>
+}
