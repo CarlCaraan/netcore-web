@@ -16,5 +16,13 @@ public class CardFileValidator : AbstractValidator<CardFileModel>
         RuleFor(x => x.Type)
             .NotEmpty()
             .WithMessage("Type is required.");
+
+        RuleFor(x => x.Address)
+            .NotEmpty()
+            .WithMessage("Address is required.");
+
+        RuleFor(x => x.TINNumber)
+            .NotEmpty()
+            .WithMessage("TIN Number is required.");
     }
 }

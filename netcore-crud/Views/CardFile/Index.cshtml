@@ -36,21 +36,199 @@
 <div class="container-fluid mt-3">
     <!-- Message Alert -->
     @Model.Common.Message
+    <h6>Main Information</h6>
     <div class="card">
         <div class="card-body">
-
             <form asp-action="Save" id="formSave" method="post" class="d-inline">
                 @* HIDDEN FIELD *@
                 <input asp-for="Common.Mode" type="hidden" />
                 @* Original OriginalPubPrimary para ma-block ang pag-edit ng unique identifier. *@
                 <input asp-for="Common.OriginalPubPrimary" type="hidden" />
                 <div class="row">
-                    <label class="col-md-1 form-label small fw-semibold mb-1">Code</label>
-                    <div class="col-md-6">
-                        @* Readonly lang ang unique Group Name kapag existing record ang naka-select. *@
-                        <input asp-for="Record.Code" placeholder="Code" class="form-control form-control-sm" readonly="@Model.Common.IsEdit" />
-                        <span asp-validation-for="Record.Code" class="text-danger validation-error d-block"></span>
+
+                    <div class="col-md-8">
+                        <div class="mb-2 row">
+                            <label class="col-md-2 col-form-label-sm text-end">Card File Code<span class="fw-bold text-danger"> *</span></label>
+                            <div class="col-md-4">
+                                <input asp-for="Record.Code" placeholder="Card File" class="form-control form-control-sm" readonly="@Model.Common.IsEdit" />
+                                <span asp-validation-for="Record.Code" class="text-danger validation-error d-block"></span>
+                            </div>
+
+                            <label class="col-md-2 col-form-label-sm text-end">Card Type<span class="fw-bold text-danger"> *</span></label>
+                            <div class="col-md-4">
+                                <select asp-for="Record.Type"
+                                        asp-items="Model.Common.CardFileType"
+                                        class="form-select form-select-sm searchable-select">
+                                    <option value=""></option>
+                                </select>
+
+                                <span asp-validation-for="Record.Type"
+                                      class="text-danger validation-error d-block"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-2 row">
+                            <label class="col-md-2 col-form-label-sm text-end">
+                                Category / Sub Type
+                            </label>
+                            <div class="col-md-10">
+                                <select asp-for="Record.Category"
+                                        asp-items="Model.Common.CardFileCategory"
+                                        class="form-select form-select-sm searchable-select">
+                                    <option value=""></option>
+                                </select>
+
+                            </div>
+                        </div>
+
+                        <div class="mb-2 row">
+                            <label class="col-md-2 col-form-label-sm text-end">Company Name<span class="fw-bold text-danger"> *</span></label>
+                            <div class="col-md-10">
+                                <input asp-for="Record.Name" placeholder="Full Name / Company Name" class="form-control form-control-sm" />
+                                <span asp-validation-for="Record.Name" class="text-danger validation-error d-block"></span>
+                            </div>
+                        </div>
+
+                        <div class="border border-secondary border-dashed p-2 rounded mb-2">
+                            <div class="text-primary fw-bold small">For Form 2307</div>
+                            <div class="mb-2 row">
+                                <label class="col-md-2 col-form-label-sm text-end">Last Name</label>
+                                <div class="col-md-4">
+                                    <input asp-for="Record.LastName" placeholder="Last Name" class="form-control form-control-sm" />
+                                </div>
+                                <label class="col-md-2 col-form-label-sm text-end">Middle Name</label>
+                                <div class="col-md-4">
+                                    <input asp-for="Record.MiddleName" placeholder="Middle Name" class="form-control form-control-sm" />
+                                </div>
+                            </div>
+                            <div class="mb-2 row">
+                                <label class="col-md-2 col-form-label-sm text-end">First Name</label>
+                                <div class="col-md-4">
+                                    <input asp-for="Record.FirstName" placeholder="First Name" class="form-control form-control-sm" />
+                                </div>
+                                <label class="col-md-2 col-form-label-sm text-end">Suffix</label>
+                                <div class="col-md-4">
+                                    <input asp-for="Record.Suffix" placeholder="Suffix" class="form-control form-control-sm" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-2 row">
+                            <label class="col-md-2 col-form-label-sm text-end">Department</label>
+                            <div class="col-md-4">
+                                <input asp-for="Record.Department" placeholder="Department" class="form-control form-control-sm" />
+                            </div>
+                            <label class="col-md-2 col-form-label-sm text-end">Division</label>
+                            <div class="col-md-4">
+                                <input asp-for="Record.Division" placeholder="Division" class="form-control form-control-sm" />
+                            </div>
+                        </div>
+
+                        <div class="mb-2 row">
+                            <label class="col-md-2 col-form-label-sm text-end">Ar Terms(Days)</label>
+                            <div class="col-md-4">
+                                <input asp-for="Record.ARTerms" placeholder="Ar Terms(Days)" type="number" class="form-control form-control-sm" />
+                            </div>
+                            <label class="col-md-2 col-form-label-sm text-end">Ap Terms (Days)</label>
+                            <div class="col-md-4">
+                                <input asp-for="Record.APTerms" placeholder="Ap Terms (Days)" type="number" class="form-control form-control-sm" />
+                            </div>
+                        </div>
+
+                        <div class="mb-2 row">
+                            <label class="col-md-2 col-form-label-sm text-end">Address<span class="fw-bold text-danger"> *</span></label>
+                            <div class="col-md-10">
+                                <input asp-for="Record.Address" placeholder="Address" class="form-control form-control-sm" />
+                                <span asp-validation-for="Record.Address" class="text-danger validation-error d-block"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-2 row">
+                            <label class="col-md-2 col-form-label-sm text-end">City</label>
+                            <div class="col-md-4">
+                                <input asp-for="Record.City" placeholder="City" class="form-control form-control-sm" />
+                            </div>
+                            <label class="col-md-2 col-form-label-sm text-end">TIN<span class="fw-bold text-danger"> *</span></label>
+                            <div class="col-md-4">
+                                <input asp-for="Record.TINNumber" placeholder="TIN Number" class="form-control form-control-sm" />
+                                <span asp-validation-for="Record.TINNumber" class="text-danger validation-error d-block"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-2 row">
+                            <label class="col-md-2 col-form-label-sm text-end">Country</label>
+                            <div class="col-md-4">
+                                <input asp-for="Record.Country" placeholder="Country" class="form-control form-control-sm" />
+                            </div>
+                            <label class="col-md-2 col-form-label-sm text-end">Zip Code</label>
+                            <div class="col-md-4">
+                                <input asp-for="Record.ZipCode" placeholder="Zip Code" type="number" class="form-control form-control-sm" />
+                            </div>
+                        </div>
+
+                        <div class="mb-2 row">
+                            <label class="col-md-2 col-form-label-sm text-end">Contact Person</label>
+                            <div class="col-md-4">
+                                <input asp-for="Record.ContactPerson" placeholder="Contact Person" class="form-control form-control-sm" />
+                            </div>
+                            <label class="col-md-2 col-form-label-sm text-end">Discount</label>
+                            <div class="col-md-4">
+                                <input asp-for="Record.Discount" placeholder="Discount" class="form-control form-control-sm" />
+                            </div>
+                        </div>
+
+                        <div class="mb-2 row">
+                            <label class="col-md-2 col-form-label-sm text-end">A. Tel.Phone #:</label>
+                            <div class="col-md-4">
+                                <input asp-for="Record.Phone1a" placeholder="eg. 8123-4567" class="form-control form-control-sm" />
+                            </div>
+
+                            <label class="col-md-2 col-form-label-sm text-end">A. Mobile.Phone #:</label>
+                            <div class="col-md-4">
+                                <input asp-for="Record.Mobile1a" placeholder="eg. 091234567890" class="form-control form-control-sm" />
+                            </div>
+                        </div>
+
+                        <div class="mb-2 row">
+                            <label class="col-md-2 col-form-label-sm text-end">Fax #</label>
+                            <div class="col-md-4">
+                                <input asp-for="Record.Fax" placeholder="Fax Nos" class="form-control form-control-sm" />
+                            </div>
+                            <label class="col-md-2 col-form-label-sm text-end">Email Address</label>
+                            <div class="col-md-4">
+                                <input asp-for="Record.Email" placeholder="Email Address" class="form-control form-control-sm" />
+                            </div>
+                        </div>
+
+                        <div class="mb-2 row">
+                            <label class="col-md-2 col-form-label-sm text-end">Remarks</label>
+                            <div class="col-md-10">
+                                <input asp-for="Record.Remarks" placeholder="Remarks" class="form-control form-control-sm" />
+                            </div>
+                        </div>
+
                     </div>
+                    <div class="col-md-4">
+                        <div class="row mb-2">
+                            <label class="col-md-6 col-form-label-sm text-end">Select Card Type To Print</label>
+                            <div class="col-md-6">
+                                <select asp-items="Model.Common.CardFileType" class="form-select form-select-sm searchable-select">
+                                    <option value=""></option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-sm btn-primary w-100">Print CardFile List</button>
+                            </div>
+                        </div>
+
+                    </div>
+
                 </div>
 
 
@@ -137,8 +315,10 @@
                                 <tr>
                                     <th class="text-center" style="width:90px;">Action</th>
                                     <th>Code</th>
+                                    <th>Name</th>
+                                    <th>Name2307</th>
                                     <th>Type</th>
-                                    <th class="text-center" style="width:140px;">Can Change PW</th>
+                                    <th>TIN Number</th>
                                 </tr>
                             </thead>
 
@@ -158,7 +338,10 @@
                                                 </form>
                                             </td>
                                             <td>@row["Code"]</td>
+                                            <td>@row["Name"]</td>
+                                            <td>@row["Name2307"]</td>
                                             <td>@row["Type"]</td>
+                                            <td>@row["TINNumber"]</td>
                                         </tr>
                                     }
                                 }
@@ -190,11 +373,13 @@
 </div>
 
 
+
+
 @* SHOW MODAL *@
 @if (ViewBag.ShowModal == true)
 {
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
             var modal = new bootstrap.Modal(document.getElementById("ViewListModal"));
             modal.show();
         });

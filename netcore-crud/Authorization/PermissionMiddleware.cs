@@ -54,7 +54,7 @@
                     $"You do not have permission to perform '{permission.Action}' on '{permission.Application}'."
                 );
 
-                context.Response.Redirect("/dashboard");
+                context.Response.Redirect("/dashboard/loginsuccess");
                 return;
             }
 

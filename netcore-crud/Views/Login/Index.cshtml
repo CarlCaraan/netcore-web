@@ -3,6 +3,7 @@
 	// Layout = "~/Views/Shared/_Layout.cshtml";
 	Layout = null;
 }
+@model LoginModel
 
 <!DOCTYPE html>
 
@@ -48,12 +49,16 @@
 
 							<div class="mb-3">
 								<label class="form-label">Username</label>
-								<input name="Username" class="form-control form-control-sm" placeholder="Username" />
+								@* <input name="Username" class="form-control form-control-sm" placeholder="Username" /> *@
+								<input asp-for="Username" placeholder="Username" class="form-control form-control-sm"  />
+								<span asp-validation-for="Username" class="text-danger validation-error d-block"></span>
 							</div>
 
 							<div class="mb-3">
 								<label class="form-label">	Password</label>
-								<input type="password" name="Password" class="form-control form-control-sm" placeholder="Password" />
+								@* <input type="password" name="Password" class="form-control form-control-sm" placeholder="Password" /> *@
+								<input asp-for="Password" type="password" placeholder="Password" class="form-control form-control-sm" />
+								<span asp-validation-for="Password" class="text-danger validation-error d-block"></span>
 							</div>
 
 							<div class="d-grid">

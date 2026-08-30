@@ -1,5 +1,8 @@
 using FluentValidation;
 using netcore_crud.Authorization;
+using netcore_crud.Caching;
+using netcore_crud.Validators.CardFile;
+using netcore_crud.Validators.Login;
 using netcore_crud.Validators.Security;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,11 +10,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-//Add Session
-builder.Services.AddSession();
+builder.Services.AddSession(); // Session
 
 // FluentValidation
-builder.Services.AddValidatorsFromAssemblyContaining<SecurityValidator>();
+//builder.Services.AddValidatorsFromAssemblyContaining<SecurityValidator>(); 
+//builder.Services.AddValidatorsFromAssemblyContaining<ManageUsersValidator>(); 
+//builder.Services.AddValidatorsFromAssemblyContaining<LoginValidator>(); 
+//builder.Services.AddValidatorsFromAssemblyContaining<CardFileValidator>(); 
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+builder.Services.AddMemoryCache(); // Cache
+builder.Services.AddSingleton<CacheManager>(); //Remove Cache
 
 var app = builder.Build();
 
@@ -29,6 +37,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 app.UseSession();
+
+
 
 app.UseMiddleware<PermissionMiddleware>();
 

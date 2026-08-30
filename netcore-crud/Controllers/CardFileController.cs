@@ -1,13 +1,16 @@
 ﻿using Dapper;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using netcore_crud.App_Code;
+using netcore_crud.Authorization;
+using netcore_crud.Caching;
 using netcore_crud.Models.CardFile;
 using netcore_crud.Models.Shared;
 using System.Data;
 using System.Security.AccessControl;
-using FluentValidation;
 
 namespace netcore_crud.Controllers
 {
@@ -16,7 +19,7 @@ namespace netcore_crud.Controllers
     [Route("sys-card-file")]
     public class CardFileController : BaseController
     {
-        public string ModuleName = "CardFile";
+        public const string ModuleName = "Card File";
         public string ModuleAbbr = "CRDF";
         // Configuration ng main table at mga fields na ginagamit ng module.
         string PubTableName = "CardFile";
@@ -25,12 +28,14 @@ namespace netcore_crud.Controllers
         string PubThird = "Category";
 
         private readonly IConfiguration _configuration;
+        private readonly CacheManager _cacheManager;
         private readonly IValidator<CardFileModel> _validator;
 
-        public CardFileController(IConfiguration configuration, IValidator<CardFileModel> validator)
+        public CardFileController(IConfiguration configuration, IValidator<CardFileModel> validator, CacheManager cacheManager)
         {
             _configuration = configuration;
             _validator = validator;
+            _cacheManager = cacheManager;
         }
 
 
@@ -44,15 +49,23 @@ namespace netcore_crud.Controllers
                 PubPrimary,
                 pubPrimaryValue);
 
+            //Load Dropdowns
+
+
             // Kapag may napiling group, isama ang related authority at menu records.
             if (!string.IsNullOrWhiteSpace(pubPrimaryValue))
             {
                 // Walang Detail
             }
 
+            using var myconn = new SqlConnection(_configuration.GetConnectionString("NetCoreConnection"));
+            model.Common.CardFileType = myconn.Query<SelectListItem>("SELECT CardFileType AS Value, CardFileType AS Text FROM CardFileTypeSetup ORDER BY CardFileType").ToList();
+            model.Common.CardFileCategory = myconn.Query<SelectListItem>("SELECT CardFileCategory AS Value, CardFileCategory AS Text FROM CardFileCategorySetup ORDER BY CardFileCategory").ToList();
+
             return model;
         }
 
+        [Permission(ModuleName, "READ")]
         [HttpGet("{PubPrimaryValue?}")]
         // Ipakita ang module; optional ang group name para sa selected record.
         public IActionResult Index(string? PubPrimaryValue)
@@ -61,7 +74,7 @@ namespace netcore_crud.Controllers
         }
 
 
-
+        [Permission(ModuleName, "INSERT")]
         [HttpPost("new")]
         // Maghanda ng blank record na puwedeng i-save bilang bagong security group.
         public IActionResult New()
@@ -121,6 +134,7 @@ namespace netcore_crud.Controllers
                 ModelState.Remove("Common.Mode");
                 ModelState.Remove("Common.OriginalPubPrimary");
 
+                _cacheManager.Clear(CacheKeys.Dashboard);
 
                 return View("Index", viewModel);
             }
@@ -133,7 +147,7 @@ namespace netcore_crud.Controllers
             }
         }
 
-
+        [Permission(ModuleName, "EDIT")]
         [HttpPost("select")]
         // I-redirect sa selected group para ma-load ang complete record details.
         public IActionResult Select(String PubPrimaryValue)
@@ -165,7 +179,7 @@ namespace netcore_crud.Controllers
             return View("Index", viewModel);
         }
 
-
+        [Permission(ModuleName, "DELETE")]
         [HttpPost("delete")]
         // I-delete ang selected group at ang mga related detail records.
         public IActionResult Delete(ModuleViewModel<CardFileModel> model)
@@ -186,6 +200,8 @@ namespace netcore_crud.Controllers
 
                 ModelState.Clear();
 
+                _cacheManager.Clear(CacheKeys.Dashboard);
+
                 return View("Index", viewModel);
             }
             catch (Exception ex)
@@ -197,6 +213,7 @@ namespace netcore_crud.Controllers
             }
         }
 
+        [Permission(ModuleName, "EDIT")]
         [HttpPost("searchmodule")]
         // Maghanap ng pinakamalapit na record gamit ang mga field na may laman sa model.
         public IActionResult SearchModule(ModuleViewModel<CardFileModel> model)

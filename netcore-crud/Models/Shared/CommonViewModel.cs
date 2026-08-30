@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Html;
-using netcore_crud.Models.Security;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using netcore_crud.Models.CardFile;
+using netcore_crud.Models.Security;
 using System.Data;
 
 namespace netcore_crud.Models.Shared
@@ -44,5 +45,9 @@ namespace netcore_crud.Models.Shared
         public List<UserAuthorityModel> UserAuthority { get; set; } = new();
         public List<MenuChoiceModel> MenuChoice { get; set; } = new();
         public List<LoginNamesModel> LoginNames { get; set; } = new();
+
+        // CARD FILE DROPDOWNS
+        public List<SelectListItem> CardFileType { get; set; } = new();
+        public List<SelectListItem> CardFileCategory { get; set; } = new();
     }
 }

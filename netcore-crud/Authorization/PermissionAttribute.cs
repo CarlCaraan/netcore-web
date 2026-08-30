@@ -10,7 +10,7 @@
 
         public PermissionAttribute(string application, string action)
         {
-            Application = application;
+            Application = application.ToUpper();
             Action = action;
         }
     }

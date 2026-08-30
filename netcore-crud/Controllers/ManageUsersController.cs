@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using netcore_crud.App_Code;
+using netcore_crud.Caching;
 using netcore_crud.Models.Security;
 using netcore_crud.Models.Shared;
 using netcore_crud.Validators.Security;
@@ -11,12 +12,14 @@ namespace netcore_crud.Controllers
     public class ManageUsersController : Controller
     {
         private readonly IConfiguration _configuration;
+        private readonly CacheManager _cacheManager;
         private readonly ManageUsersValidator _validator;
 
-        public ManageUsersController(IConfiguration configuration, ManageUsersValidator validator)
+        public ManageUsersController(IConfiguration configuration, ManageUsersValidator validator, CacheManager cacheManager)
         {
             _configuration = configuration;
             _validator = validator;
+            _cacheManager = cacheManager;
         }
 
         private ModuleViewModel<LoginNamesModel> BuildModel(string? groupName)
@@ -99,6 +102,8 @@ namespace netcore_crud.Controllers
             var savedModel = BuildModel(groupName);
             savedModel.Common.Message = Commons.ShowMessage("success", "Record saved successfully.");
 
+            _cacheManager.Clear(CacheKeys.Dashboard);
+
             return View("Index", savedModel);
         }
 
@@ -122,6 +127,8 @@ namespace netcore_crud.Controllers
 
                 var savedModel = BuildModel(groupName);
                 savedModel.Common.Message = Commons.ShowMessage("success", "User deleted successfully.");
+
+                _cacheManager.Clear(CacheKeys.Dashboard);
 
                 return View("Index", savedModel);
             }

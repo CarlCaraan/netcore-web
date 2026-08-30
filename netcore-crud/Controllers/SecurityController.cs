@@ -1,14 +1,15 @@
 ﻿using Dapper;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Data.SqlClient;
 using netcore_crud.App_Code;
+using netcore_crud.Authorization;
+using netcore_crud.Caching;
 using netcore_crud.Models.Security;
 using netcore_crud.Models.Shared;
 using System.Data;
 using System.Security.AccessControl;
-using FluentValidation;
-using netcore_crud.Authorization;
 
 namespace netcore_crud.Controllers
 {
@@ -26,12 +27,14 @@ namespace netcore_crud.Controllers
         string PubThird = "CanChangePW";
 
         private readonly IConfiguration _configuration;
+        private readonly CacheManager _cacheManager;
         private readonly IValidator<SecurityModel> _validator;
 
-        public SecurityController(IConfiguration configuration, IValidator<SecurityModel> validator)
+        public SecurityController(IConfiguration configuration, IValidator<SecurityModel> validator, CacheManager cacheManager)
         {
             _configuration = configuration;
             _validator = validator;
+            _cacheManager = cacheManager;
         }
 
 
@@ -133,9 +136,6 @@ namespace netcore_crud.Controllers
             model.Record.ModifiedDate = DateTime.Now;
 
             // Default values ng fields sa bagong group.
-            model.Record.GroupName = "";
-            model.Record.Description = "";
-            model.Record.CanChangePW = false;
 
             return View("Index", model);
         }
@@ -155,7 +155,6 @@ namespace netcore_crud.Controllers
             //        }
             //    }
             //}
-
 
             if (string.IsNullOrWhiteSpace(model.Common.Mode))
             {
@@ -211,6 +210,7 @@ namespace netcore_crud.Controllers
                 ModelState.Remove("Common.Mode");
                 ModelState.Remove("Common.OriginalPubPrimary");
 
+                _cacheManager.Clear(CacheKeys.Dashboard);
 
                 return View("Index", viewModel);
             }
@@ -277,6 +277,8 @@ namespace netcore_crud.Controllers
                 viewModel.Common.Message = Commons.ShowMessage("success", "Record deleted successfully.");
 
                 ModelState.Clear();
+
+                _cacheManager.Clear(CacheKeys.Dashboard);
 
                 return View("Index", viewModel);
             }
