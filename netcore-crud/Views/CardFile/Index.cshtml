@@ -211,26 +211,31 @@
                         </div>
 
                     </div>
-                    <div class="col-md-4">
-                        <div class="row mb-2">
-                            <label class="col-md-6 col-form-label-sm text-end">Select Card Type To Print</label>
-                            <div class="col-md-6">
-                                <select asp-items="Model.Common.CardFileType" class="form-select form-select-sm searchable-select">
-                                    <option value=""></option>
-                                </select>
+                        <div class="col-md-4">
+                            <div class="row mb-2">
+                                <label class="col-md-6 col-form-label-sm text-end">Select Card Type To Print</label>
+
+                                <div class="col-md-6">
+                                    <select name="cardType"
+                                            asp-items="Model.Common.CardFileType"
+                                            class="form-select form-select-sm searchable-select">
+                                        <option value="">-- Select --</option>
+                                    </select>
+                                </div>
                             </div>
 
+                            <div class="row">
+                                <div class="col-md-6">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <button type="submit" class="btn btn-sm btn-primary w-100" formaction="@Url.Action("CardFileRpt", "Report")"
+                                        formmethod="get" formtarget="_blank">
+                                        Print CardFile List
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                            </div>
-                            <div class="col-md-6">
-                                <button class="btn btn-sm btn-primary w-100">Print CardFile List</button>
-                            </div>
-                        </div>
-
-                    </div>
 
                 </div>
 

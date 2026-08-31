@@ -1,0 +1,11 @@
+﻿@model netcore_crud.Reports.CardFileReport
+
+@using DevExpress.AspNetCore
+
+@{
+    ViewData["Title"] = "Card File Report";
+}
+
+<div style="height: 900px;">
+    @Html.DevExpress().WebDocumentViewer("DocumentViewer").Height("100%").Bind(Model)
+</div>

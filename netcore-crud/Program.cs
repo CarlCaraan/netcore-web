@@ -1,3 +1,5 @@
+using DevExpress.AspNetCore;
+using DevExpress.AspNetCore.Reporting;
 using FluentValidation;
 using netcore_crud.Authorization;
 using netcore_crud.Caching;
@@ -21,8 +23,19 @@ builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 builder.Services.AddMemoryCache(); // Cache
 builder.Services.AddSingleton<CacheManager>(); //Remove Cache
 
+//DevExpress Reporting
+builder.Services.AddDevExpressControls();
+builder.Services.ConfigureReportingServices(configurator =>
+{
+    configurator.ConfigureWebDocumentViewer(viewerConfigurator =>
+    {
+        viewerConfigurator.UseCachedReportSourceBuilder();
+    });
+});
+
 var app = builder.Build();
 
+app.UseDevExpressControls();// DevExpress Reporting
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

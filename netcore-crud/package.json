@@ -1,5 +1,8 @@
 {
   "dependencies": {
-    "chart.js": "^4.5.1"
+    "@devexpress/analytics-core": "^26.1.4",
+    "chart.js": "^4.5.1",
+    "devexpress-reporting": "^26.1.4",
+    "devextreme-dist": "^26.1.4"
   }
 }
