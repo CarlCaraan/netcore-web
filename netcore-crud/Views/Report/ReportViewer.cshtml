@@ -1,0 +1,20 @@
+﻿@model DevExpress.XtraReports.UI.XtraReport
+@using DevExpress.AspNetCore
+
+@{
+    ViewData["Title"] = "Report Preview";
+}
+
+@(
+    Html.DevExpress().WebDocumentViewer("reportViewer")
+        .Height("1000px")
+        .Bind(Model)
+)
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $("#Layer_1").click();
+        });
+    </script>
+}

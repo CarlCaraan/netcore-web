@@ -27,7 +27,7 @@ namespace netcore_crud.Controllers
 
             var report = new CardFileReport(data);
 
-            return View(report);
+            return View("ReportViewer", report);
         }
     }
 }
