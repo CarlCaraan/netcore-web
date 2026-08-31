@@ -3,18 +3,42 @@
 
 @{
     ViewData["Title"] = "Report Preview";
+    Layout = null;
 }
 
-@(
-    Html.DevExpress().WebDocumentViewer("reportViewer")
-        .Height("1000px")
-        .Bind(Model)
-)
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-@section Scripts {
+    <title>Report Preview</title>
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/thirdparty.bundle.css" />
+    <link rel="stylesheet" href="~/css/viewer.part.bundle.css" />
+</head>
+
+<body>
+    <script src="~/js/thirdparty.bundle.js"></script>
+    <script src="~/js/viewer.part.bundle.js"></script>
+
+    @(
+        Html.DevExpress().WebDocumentViewer("reportViewer")
+            .Height("1000px")
+            .Bind(Model)
+    )
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @* Remove License Message *@
     <script>
-        $(document).ready(function() {
-            $("#Layer_1").click();
-        });
+            $(document).ready(function() {
+                $("#Layer_1").click();
+            });
     </script>
-}
+</body>
+</html>
