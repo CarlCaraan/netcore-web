@@ -19,7 +19,7 @@ namespace netcore_crud.Controllers
         public IActionResult CardFileRpt(string? cardType)
         {
             if (string.IsNullOrWhiteSpace(cardType))
-                return RedirectToAction("Index", "CardFile");
+                cardType ="";
 
             using var myconn = new SqlConnection(_configuration.GetConnectionString("NetCoreConnection"));
 
@@ -27,7 +27,21 @@ namespace netcore_crud.Controllers
 
             var report = new CardFileReport(data);
 
+            cardType = string.IsNullOrWhiteSpace(cardType) ? "ALL" : cardType;
+            report.Parameters["CardType"].Value = cardType;
+            report.RequestParameters = false;
+
             return View("ReportViewer", report);
         }
+
+
+
+        ////MORE REPORTS HERE
+        //public IActionResult TestRpt(string? cardType)
+        //{
+        //}
+        
+
+
     }
 }
