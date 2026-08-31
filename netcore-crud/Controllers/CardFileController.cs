@@ -150,6 +150,12 @@ namespace netcore_crud.Controllers
         // I-save ang bagong group o update sa existing group.
         public async Task<IActionResult> Save(ModuleViewModel<CardFileModel> model)
         {
+            if (string.IsNullOrWhiteSpace(model.Common.Mode))
+            {
+                model.Common.Message = Commons.ShowMessage("danger", "Select or click New first before saving record");
+                return View("Index", model);
+            }
+
             //FluentValidator
             var validationResult = await _validator.ValidateAsync(model.Record);
             if (!validationResult.IsValid)
