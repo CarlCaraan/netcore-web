@@ -106,6 +106,9 @@ namespace netcore_crud.Controllers
                     model.Record.GroupName);
 
             }
+            else {
+                model.Common.IsDisable = true;
+            }
 
             return model;
         }
