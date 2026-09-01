@@ -57,6 +57,10 @@ namespace netcore_crud.Controllers
             {
                 // Walang Detail
             }
+            else
+            {
+                model.Common.IsDisable = false;
+            }
 
             using var myconn = new SqlConnection(_configuration.GetConnectionString("NetCoreConnection"));
             model.Common.CardFileType = myconn.Query<SelectListItem>("SELECT CardFileType AS Value, CardFileType AS Text FROM CardFileTypeSetup ORDER BY CardFileType").ToList();
