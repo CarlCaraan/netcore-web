@@ -10,7 +10,6 @@ using netcore_crud.Caching;
 using netcore_crud.Models.CardFile;
 using netcore_crud.Models.Shared;
 using System.Data;
-using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace netcore_crud.Controllers
 {
@@ -19,7 +18,7 @@ namespace netcore_crud.Controllers
     [Route("sys-card-file")]
     public class CardFileController : BaseController
     {
-        public const string ModuleName = "Card File";
+        public const string ModuleName = "CARD FILE";
         public string ModuleAbbr = "CRDF";
         // Configuration ng main table at mga fields na ginagamit ng module.
         string PubTableName = "CardFile";
@@ -113,6 +112,8 @@ namespace netcore_crud.Controllers
             return View("Index", model);
         }
 
+
+        [HttpPost("selectcardtype")]
         public IActionResult SelectCardType(string cardType)
         {
             var model = BuildModel(null);

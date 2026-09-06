@@ -6,7 +6,7 @@ using netcore_crud.Reports;
 
 namespace netcore_crud.Controllers
 {
-    public class ReportController : Controller
+    public class ReportController : BaseController
     {
         private readonly IConfiguration _configuration;
 

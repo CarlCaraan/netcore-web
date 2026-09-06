@@ -10,26 +10,28 @@
         <i class="bi bi-shield-lock-fill"></i>
         CARD FILE
         <span class="module-status">
-            >>@Model.Common.Status
+            >> <span class="text-warning fw-bold">
+            @Model.Common.Status
         </span>
-    </div>
+    </span>
+</div>
 
-    <div class="module-toolbar">
-        <form asp-action="New" method="post" class="d-inline">
-            <button class="btn btn-sm btn-toolbar"><i class="bi bi-plus-lg"></i> New</button>
-        </form>
-        <button form="formSave" class="btn btn-sm btn-toolbar"><i class="bi bi-floppy"></i> Save</button>
-        <form id="formDelete" asp-controller="CardFile" asp-action="Delete" method="post">
-            <input type="hidden" name="Record.Code" value="@Model.Record.Code" />
+<div class="module-toolbar">
+    <form asp-action="New" method="post" class="d-inline">
+        <button class="btn btn-sm btn-toolbar"><i class="bi bi-plus-lg"></i> New</button>
+    </form>
+    <button form="formSave" class="btn btn-sm btn-toolbar"><i class="bi bi-floppy"></i> Save</button>
+    <form id="formDelete" asp-controller="CardFile" asp-action="Delete" method="post">
+        <input type="hidden" name="Record.Code" value="@Model.Record.Code" />
 
-            <button type="button" class="btn btn-sm btn-toolbar" onclick="confirmDelete()" disabled="@Model.Common.IsDisable">
-                <i class="bi bi-trash"></i> Delete
-            </button>
-        </form>
-        <a asp-action="Index" asp-route-PubPrimaryValue="" class="btn btn-sm btn-toolbar"> <i class="bi bi-file-earmark"></i>Clear</a>
-        <button type="submit" form="formSave" formaction="@Url.Action("SearchModule")" class="btn btn-sm btn-toolbar"><i class="bi bi-search"></i> Search </button>
-        <button class="btn btn-sm btn-toolbar" data-bs-toggle="modal" data-bs-target="#ViewListModal"><i class="bi bi-list-ul"></i> List</button>
-    </div>
+        <button type="button" class="btn btn-sm btn-toolbar" onclick="confirmDelete()" disabled="@Model.Common.IsDisable">
+            <i class="bi bi-trash"></i> Delete
+        </button>
+    </form>
+    <a asp-action="Index" asp-route-PubPrimaryValue="" class="btn btn-sm btn-toolbar"> <i class="bi bi-file-earmark"></i>Clear</a>
+    <button type="submit" form="formSave" formaction="@Url.Action("SearchModule")" class="btn btn-sm btn-toolbar"><i class="bi bi-search"></i> Search </button>
+    <button class="btn btn-sm btn-toolbar" data-bs-toggle="modal" data-bs-target="#ViewListModal"><i class="bi bi-list-ul"></i> List</button>
+</div>
 
 </div>
 
@@ -211,31 +213,31 @@
                         </div>
 
                     </div>
-                        <div class="col-md-4">
-                            <div class="row mb-2">
-                                <label class="col-md-6 col-form-label-sm text-end">Select Card Type To Print</label>
+                    <div class="col-md-4">
+                        <div class="row mb-2">
+                            <label class="col-md-6 col-form-label-sm text-end">Select Card Type To Print</label>
 
-                                <div class="col-md-6">
-                                    <select name="cardType"
-                                            asp-items="Model.Common.CardFileType"
-                                            class="form-select form-select-sm searchable-select">
-                                        <option value="">-- Select --</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <button type="submit" class="btn btn-sm btn-primary w-100" formaction="@Url.Action("CardFileRpt", "Report")"
-                                        formmethod="get" formtarget="_blank">
-                                        Print CardFile List
-                                    </button>
-                                </div>
+                            <div class="col-md-6">
+                                <select name="cardType"
+                                        asp-items="Model.Common.CardFileType"
+                                        class="form-select form-select-sm searchable-select">
+                                    <option value="">-- Select --</option>
+                                </select>
                             </div>
                         </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                            </div>
+
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-sm btn-primary w-100" formaction="@Url.Action("CardFileRpt", "Report")"
+                                        formmethod="get" formtarget="_blank">
+                                    Print CardFile List
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
 

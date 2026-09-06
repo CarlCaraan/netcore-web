@@ -28,6 +28,12 @@ namespace netcore_crud.Controllers
         // Ipakita ang login form.
         public IActionResult Index()
         {
+            string? userName = HttpContext.Session.GetString("UserName");
+            if (!string.IsNullOrWhiteSpace(userName))
+            {
+                return Redirect("/dashboard/LoginSuccess");
+            }
+
             return View();
         }
 

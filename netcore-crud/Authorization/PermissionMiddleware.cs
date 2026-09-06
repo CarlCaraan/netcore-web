@@ -38,7 +38,8 @@
 
             if (string.IsNullOrWhiteSpace(userName))
             {
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                //context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                context.Response.Redirect("/");
                 return;
             }
 
