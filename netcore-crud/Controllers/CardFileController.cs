@@ -170,6 +170,8 @@ namespace netcore_crud.Controllers
                     ModelState.AddModelError($"Record.{error.PropertyName}", error.ErrorMessage);
                 }
 
+                 model = BuildModel(null);
+
                 return View("Index", model);
             }
 
