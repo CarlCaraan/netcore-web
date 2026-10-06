@@ -362,3 +362,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /netcore-crud/appsettings.json
+/DB/NETCORE 10-06-2026.bak
