@@ -31,6 +31,18 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: netcore-crud/package-lock.json
+
+      - name: Install npm dependencies
+        working-directory: ./netcore-crud
+        run: npm ci
+
+
       - name: Restore
         run: dotnet restore ./netcore-crud/netcore-crud.csproj
 
