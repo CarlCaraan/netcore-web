@@ -1,0 +1,84 @@
+
+name: Build and Deploy netcore-crud
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  ACR_NAME: netcorecrudacr
+  ACR_LOGIN_SERVER: netcorecrudacr-hgacdrcygxczf4ak.azurecr.io
+  IMAGE_NAME: netcore-crud
+  WEBAPP_NAME: netcore-crud-web
+  RESOURCE_GROUP: netcore-crud-rg
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore ./netcore-crud/netcore-crud.csproj
+
+      - name: Build
+        run: dotnet build ./netcore-crud/netcore-crud.csproj --configuration Release --no-restore
+
+      - name: Azure login using OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Login to Azure Container Registry
+        run: az acr login --name "$ACR_NAME"
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t "$ACR_LOGIN_SERVER/$IMAGE_NAME:${GITHUB_SHA}" \
+            ./netcore-crud
+
+      - name: Push Docker image
+        run: |
+          docker push "$ACR_LOGIN_SERVER/$IMAGE_NAME:${GITHUB_SHA}"
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Azure login using OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Update App Service container
+        run: |
+          az webapp config container set \
+            --name "$WEBAPP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
+            --container-image-name "$ACR_LOGIN_SERVER/$IMAGE_NAME:${GITHUB_SHA}" \
+            --container-registry-url "https://$ACR_LOGIN_SERVER"
+
+      - name: Restart App Service
+        run: |
+          az webapp restart \
+            --name "$WEBAPP_NAME" \
+            --resource-group "$RESOURCE_GROUP"
