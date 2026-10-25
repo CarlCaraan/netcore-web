@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - master
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 permissions:
@@ -84,17 +86,36 @@ jobs:
       - name: Login to Azure Container Registry
         run: az acr login --name "$ACR_NAME"
 
-      # Build Docker image using the netcore-crud folder
+      # Build Docker image using the netcore-crud folder with a unique commit SHA
       - name: Build Docker image
         run: |
           docker build \
             -t "$ACR_LOGIN_SERVER/$IMAGE_NAME:$IMAGE_TAG" \
             ./netcore-crud
 
-      # Push the image to ACR
+          # Add the latest tag to the same image
+          docker tag \
+            "$ACR_LOGIN_SERVER/$IMAGE_NAME:$IMAGE_TAG" \
+            "$ACR_LOGIN_SERVER/$IMAGE_NAME:latest"
+
+          # Add a version tag when a Git version tag is pushed
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+            docker tag \
+              "$ACR_LOGIN_SERVER/$IMAGE_NAME:$IMAGE_TAG" \
+              "$ACR_LOGIN_SERVER/$IMAGE_NAME:$VERSION"
+          fi
+
+      # Push all applicable tags to ACR
       - name: Push Docker image
         run: |
           docker push "$ACR_LOGIN_SERVER/$IMAGE_NAME:$IMAGE_TAG"
+          docker push "$ACR_LOGIN_SERVER/$IMAGE_NAME:latest"
+
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+            docker push "$ACR_LOGIN_SERVER/$IMAGE_NAME:$VERSION"
+          fi
 
   deploy:
     name: Deploy to Azure App Service
@@ -128,11 +149,21 @@ jobs:
       # Configure App Service to use the newly pushed image
       - name: Update App Service container
         run: |
+          DEPLOY_TAG="$IMAGE_TAG"
+
+          # Use the version tag for official releases
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            DEPLOY_TAG="${GITHUB_REF#refs/tags/}"
+          fi
+
+          echo "Deploying image: $ACR_LOGIN_SERVER/$IMAGE_NAME:$DEPLOY_TAG"
+
           az webapp config container set \
             --name "$WEBAPP_NAME" \
             --resource-group "$RESOURCE_GROUP" \
-            --container-image-name "$ACR_LOGIN_SERVER/$IMAGE_NAME:$IMAGE_TAG" \
+            --container-image-name "$ACR_LOGIN_SERVER/$IMAGE_NAME:$DEPLOY_TAG" \
             --container-registry-url "https://$ACR_LOGIN_SERVER"
+
 
       # Restart the application
       - name: Restart App Service
